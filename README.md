@@ -2,6 +2,7 @@
 Team 02 - MSP Architect Training 2026
 
 2-Tier 아키텍처 기반의 보안 강화 컨테이너 인프라 구축 및 취약점 분석
+
 <img width="688" height="514" alt="image" src="https://github.com/user-attachments/assets/454d2175-90ac-475a-94b5-708768a7476a" />
 
 침해 사고 발생 시 피해 범위를 최소화하는 심층 방어 구조 지향
