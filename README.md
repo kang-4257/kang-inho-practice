@@ -2,7 +2,7 @@
 Team 02 - MSP Architect Training 2026
 
 ## AI 보안 엔진 기반의 Zero-Trust 통합 서비스 플랫폼 구축
-사용자 게시판 서비스에 Gemini AI 기반의 자동 보안 진단 및 K3s 네트워크 격리 기술을 결합하여, 서비스 운영과 보안 관리를 일원화한 DevSecOps 실증 플랫폼.
+사용자 게시판 서비스에 Gemini AI 기반의 자동 보안 진단 및 K3s 네트워크 격리 기술을 결합하여, 서비스 운영과 보안 관리를 일원화한 DevSecOps 플랫폼.
 
 ### 프로젝트 개요:
 
