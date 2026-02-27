@@ -25,8 +25,7 @@ app = FastAPI()
 load_dotenv()
 # 최신 google-genai SDK 적용
 client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"), 
-    http_options={'api_version': 'v1'})
+    api_key=os.getenv("GEMINI_API_KEY"))
 
 # --- Pydantic 모델 (입력값 검증용) ---
 class UserRequest(BaseModel):
