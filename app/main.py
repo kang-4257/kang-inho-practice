@@ -8,8 +8,10 @@ import os
 from google import genai
 from dotenv import load_dotenv
 
+load_dotenv()
 # --- DB 연결 설정 ---
-DB_URL = "postgresql://myuser:mypassword@localhost:5432/mydatabase"
+db_password = os.getenv("DB_PASSWORD")
+DB_URL = f"postgresql://myuser:{db_password}@localhost:5432/mydatabase"
 
 # DB 엔진 및 세션 생성
 engine = create_engine(DB_URL)
