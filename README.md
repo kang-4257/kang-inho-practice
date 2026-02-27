@@ -16,20 +16,3 @@ Team 02 - MSP Architect Training 2026
 
 - 실시간 시각화: 파이프라인 분석 결과의 DB 연동을 통한 보안 점수 및 조치 가이드의 GUI 대시보드 구현.
 
-```mermaid
-graph TD
-    User((사용자)) -->|HTTPS| App[FastAPI App]
-    Admin((관리자)) -->|Dashboard| App
-    
-    subgraph "K3s Cluster"
-        App -->|Query| DB[(PostgreSQL)]
-        App -.->|Scan Request| Trivy[Trivy Scanner]
-        Trivy -->|Scan Data| Gemini((Gemini AI))
-        Gemini -->|Analysis| DB
-    end
-    
-    subgraph "Security Layer"
-        Secret[K8s Secret] -.-> App
-        Policy[Network Policy] -.-> DB
-    end
-```
