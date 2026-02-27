@@ -10,8 +10,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # --- DB 연결 설정 ---
-db_password = os.getenv("DB_PASSWORD")
-DB_URL = f"postgresql://myuser:{db_password}@localhost:5432/mydatabase"
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD") 
+DB_HOST = os.getenv("DB_HOST", "postgres_db")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "postgres")
+
+DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # DB 엔진 및 세션 생성
 engine = create_engine(DB_URL)
