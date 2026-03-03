@@ -16,3 +16,14 @@ Team 02 - MSP Architect Training 2026
 
 - 실시간 시각화: 파이프라인 분석 결과의 DB 연동을 통한 보안 점수 및 조치 가이드의 GUI 대시보드 구현.
 
+## API
+https://github.com/msp-architect-2026/kang-inho/wiki/API
+
+## ERD
+https://github.com/msp-architect-2026/kang-inho/wiki/ERD
+
+## Application Architecture
+https://github.com/msp-architect-2026/kang-inho/wiki/Application-Architecture
+
+## Infra Architecture
+https://github.com/msp-architect-2026/kang-inho/wiki/Infra-Architecture
