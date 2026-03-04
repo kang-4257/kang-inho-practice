@@ -1,5 +1,29 @@
-venv/
-__pycache__/
-*.pyc
-.env
+# --- OS & IDE ---
+.DS_Store
 .vscode/
+.idea/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.venv/
+env/
+venv/
+.env
+
+# --- Docker & Build ---
+*.tar
+*.tar.gz
+*.sh
+# get-docker.sh 같이 일회성 스크립트 제외
+
+# --- Database ---
+*.db
+*.sqlite3
+
+# --- Secrets (보안) ---
+*secret.yaml
+*.pem
+*.key
