@@ -22,7 +22,7 @@ jobs:
           output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH'
 
-      # 3. Gemini한테 스캔 결과 보내서 분석 맡기기
+      # 3. Gemini한테 스캔 결과 보내 분석
       - name: Gemini AI Analysis
         id: gemini
         env:
