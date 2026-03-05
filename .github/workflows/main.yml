@@ -24,18 +24,19 @@ jobs:
           echo "--- Trivy Scan Result ---"
           cat trivy-report.txt
 
-      # 3. Gemini AI 분석 및 리포트 파일 생성 강제화
+      # 3. Gemini 분석 전에 필요한 라이브러리 설치
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install google-generativeai
+
+      # 4. Gemini AI 분석 및 리포트 파일 생성 강제화
       - name: Gemini AI Analysis
         id: gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # [핵심 수정] 스캔 결과를 읽어 Gemini에게 전달하고 결과를 '반드시' 파일로 저장(>)
-          # 만약 python 스크립트를 사용 중이시라면 아래와 같이 경로를 명시하고 저장하세요.
-          # (스크립트 경로가 다르다면 .github/scripts/분석.py 등으로 수정)
-          
-          # 예시: 셸에서 직접 API를 호출하거나 파이썬 스크립트 실행 결과를 파일로 씀
-          # 아래는 질문자님의 환경에 맞춘 가상의 실행 명령어입니다.
+        
           python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
 
           # [검증 로직] 파일이 비어있는지 체크하여 이슈 생성 실패 방지
