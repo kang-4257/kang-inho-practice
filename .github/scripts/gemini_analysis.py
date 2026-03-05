@@ -17,7 +17,7 @@ def main():
     try:
         with open("trivy-report.txt", "r") as f:
             # 앞부분 3000자만 읽어서 토큰 제한 회피
-            scan_result = f.read(3000) 
+            scan_result = f.read(1000) 
     except FileNotFoundError:
         print("[에러] trivy-report.txt 파일 없음.")
         return
