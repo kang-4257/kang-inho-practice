@@ -6,29 +6,27 @@ def main():
     # 저장해둔 API 키 가져오기
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        print("에러: API 키가 없어서 분석을 못 하겠어.")
+        print("[에러] GEMINI_API_KEY 누락됨.")
         return
     
     # 제미나이 설정
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
     # 트리비가 스캔해서 만들어준 파일 열기
     try:
         with open("trivy-report.txt", "r") as f:
             scan_result = f.read()
     except FileNotFoundError:
-        print("에러: trivy-report.txt 파일이 없는데? 스캔이 안 된 건가?")
+        print("[에러] trivy-report.txt 파일 없음. 스캔 단계 확인 필요.")
         return
 
     prompt = f"""
-    너는 지금부터 보안 마스터야. 
-    아래에 있는 Trivy 보안 스캔 결과를 보고 우리 팀을 위해 보안 리포트를 써줘.
-    
-    1. 발견된 모든 취약점 중에서 위험도(Critical, High)가 높은 순서대로 꼼꼼하게 분석해줘.
-    2. 개수에 상관없이 진짜 위험한 건 다 알려주되, 너무 많으면 핵심적인 것 위주로 깔끔하게 정리해줘.
-    3. 뭘 고쳐야 할지 Dockerfile 예시 코드까지 포함해서 한국어로 친절하게 설명해줘.
-    
+    보안 전문가로서 다음 Trivy 스캔 결과를 분석해줘.
+    중요도(Critical, High)가 높은 항목을 우선으로 리포트를 작성할 것.
+    취약점의 원인 및 Dockerfile 수정 예시를 반드시 포함할 것.
+    개수에 상관없이 진짜 위험한 건 다 알려주되, 너무 많으면 핵심적인 것 위주로 깔끔하게 정리할 것.
+
     스캔 결과 데이터:
     {scan_result}
     """
