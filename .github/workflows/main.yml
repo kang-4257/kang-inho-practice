@@ -4,6 +4,10 @@ name: DevSecOps-Pipeline-Auto-Scan
 on:
   push:
     branches: [ "main", "backup" ]
+    paths:
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - '.github/scripts/**'
 
 jobs:
   security-scan:
