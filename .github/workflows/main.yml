@@ -53,10 +53,14 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       # 4. 분석 결과를 이슈 탭에 자동으로 등록
-      - name: Create Issue with Result
-        uses: imjohnbo/issue-action@v3
+      - name: Create Issue
+        uses: peter-evans/create-issue-from-file@v4
         with:
-          title: "🚨 [보안 알림] 취약점 스캔 및 Gemini 조치 가이드"
+          title: "🚨 [보안 알림] Gemini AI 취약점 분석 리포트"
+          content-filepath: ./gemini-analysis.txt
+          labels: |
+            security
+            automated
           body: |
             ## 🔍 Trivy + Gemini 분석 결과
             
