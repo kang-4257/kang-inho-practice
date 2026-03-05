@@ -3,7 +3,7 @@ kind: Role
 metadata:
   namespace: default
   name: no-access-role
-rules: [] # 비어 있음 = 아무 권한도 없음
+rules: [] 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

@@ -8,63 +8,65 @@ on:
       - 'Dockerfile'
       - 'requirements.txt'
       - '.github/scripts/**'
+      - 'deployments/**'  # 쿠버네티스 설정 변경 시에도 작동
 
 jobs:
-  security-scan:
-    runs-on: ubuntu-latest
+  security-and-deploy:
+    runs-on: self-hosted 
     steps:
       # 1. 소스 코드 가져오기
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Trivy 보안 스캔
+      # 2. 도커 허브 로그인 (등록해둔 Secrets 사용)
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      # 3. 도커 이미지 빌드 (최신 태그 부여)
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/team02-app:latest .
+
+      # 4. Trivy 보안 스캔 
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'          # 현재 폴더 전체 스캔
-          ignore-unfixed: false  # 해결책이 없는 취약점도 일단 보고
-          format: 'table'
-          output: 'trivy-report.txt'
-          severity: 'CRITICAL,HIGH'
-          # 취약점뿐만 아니라 설정 오류(Config)와 비밀 정보 노출(Secret)도 탐색
-          scanners: 'vuln,config,secret'
+         scan-type: 'image'
+         image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:latest'
+         format: 'table'
+         output: 'trivy-report.txt'
+         severity: 'CRITICAL,HIGH'
+         scanners: 'vuln,config,secret'
 
       # 결과 확인용
       - name: Check Trivy Report
         run: |
           if [ -s trivy-report.txt ]; then
             echo "--- Trivy 스캔 성공 ---"
-            head -n 20 trivy-report.txt # 너무 길면 앞부분만 출력
+            head -n 20 trivy-report.txt
           else
             echo "--- Trivy 스캔 결과 없음 ---"
           fi
 
-      # 3. Gemini 분석 전에 필요한 라이브러리 설치
+      # 5. Gemini 분석 전에 필요한 라이브러리 설치
       - name: Install Python Dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip install google-generativeai
 
-      # 4. Gemini AI 분석 및 리포트 파일 생성 강제화
+      # 6. Gemini AI 분석 및 리포트 파일 생성 강제화
       - name: Gemini AI Analysis
         id: gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+           echo "✅ Gemini 분석 파일 생성 완료."
+           else
+           echo "⚠️ 분석 결과가 비어있습니다. 기본 메시지를 생성합니다."
+           echo "분석 리포트 생성 실패 혹은 취약점 없음." > gemini-analysis.txt
+           fi
 
-          python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
-
-          # [검증 로직] 파일이 비어있는지 체크하여 이슈 생성 실패 방지
-          if [ -s gemini-analysis.txt ]; then
-            echo "✅ Gemini 분석 파일 생성 완료!"
-            ls -l gemini-analysis.txt
-          else
-            echo "⚠️ 분석 결과가 비어있습니다. 기본 메시지를 생성합니다."
-            echo "Gemini 분석 리포트 생성에 실패했거나 취약점이 없습니다. 상세 내용은 Actions 로그를 확인하세요." > gemini-analysis.txt
-          fi
-
-      # 4. GitHub Issue 생성 (검증된 파일 경로 사용)
+      # 7. GitHub Issue 생성 (검증된 파일 경로 사용)
       - name: Create Issue
         uses: peter-evans/create-issue-from-file@v4
         with:
@@ -73,12 +75,16 @@ jobs:
           labels: |
             security
             automated
-          body: |
-            ## 🔍 Trivy + Gemini 분석 결과
-            
-            ${{ env.ANALYSIS }}
-            
-            ---
-            *담당자: @${{ github.actor }}*
-            *결과 확인 후 조치 완료 시 이슈를 닫아주세요.*
-          token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 8. 도커 허브에 이미지 업로드 (배포용)
+      - name: Push to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/team02-app:latest
+
+      # 9. k3s 클러스터에 최종 배포
+      - name: Deploy to K3s
+        run: |
+          # deployments 폴더 내의 RBAC, NetworkPolicy, Deployment 모두 적용
+          kubectl apply -f deployments/
+          # 새로운 이미지 적용을 위해 재시작
+          kubectl rollout restart deployment fastapi-web

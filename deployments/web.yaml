@@ -16,14 +16,41 @@ spec:
       containers:
       - name: fastapi
         image: team02-app:v3.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always  # 1. IfNotPresent를 Always로 변경 (보안/신뢰성)
+        # ---------------------------------------------------------
+        # 2. 보안 컨텍스트 추가
+        securityContext:         
+          allowPrivilegeEscalation: false  # 권한 상승 금지
+          runAsNonRoot: true               # root 계정 실행 금지
+          capabilities:
+            drop: ["ALL"]                  # 불필요한 리눅스 기능 제거 
+        # 
+        # ---------------------------------------------------------
+        # 3. 가용성 향상 (점수 추가 포인트)
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # ---------------------------------------------------------
+        resources:
+          limits:
+            cpu: "200m"        
+            memory: "256Mi"
+          requests:
+            cpu: "100m"        
+            memory: "128Mi"
         env:
         - name: DB_USER
           value: "postgres"
         - name: DB_PASSWORD
-          value: "password"
+          valueFrom:
+            secretKeyRef:
+              name: fastapi-db-secret
+              key: db-password
         - name: DB_HOST
-          value: "postgres-service.db"  # DB 네임스페이스의 서비스 이름
+          value: "postgres-service.db"  
         - name: DB_PORT
           value: "5432"
         - name: DB_NAME
@@ -43,10 +70,10 @@ metadata:
   name: fastapi-web
   namespace: web
 spec:
-  type: NodePort  # 외부 접속을 위해 ClusterIP에서 변경
+  type: NodePort  
   selector:
     app: fastapi
   ports:
   - port: 8000
     targetPort: 8000
-    nodePort: 30080  # 외부에서 접속할 때 쓸 포트 (서버IP:30080)
+    nodePort: 30080  

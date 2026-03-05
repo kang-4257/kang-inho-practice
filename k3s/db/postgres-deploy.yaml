@@ -17,11 +17,15 @@ spec:
       - name: postgres
         image: postgres:15
         env:
+        - name: POSTGRES_USER
+          value: "postgres"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secret
               key: password
+        - name: POSTGRES_DB
+          value: "board"      
         ports:
         - containerPort: 5432
         volumeMounts:

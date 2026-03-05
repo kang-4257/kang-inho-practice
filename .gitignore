@@ -16,8 +16,7 @@ venv/
 # --- Docker & Build ---
 *.tar
 *.tar.gz
-*.sh
-# get-docker.sh 같이 일회성 스크립트 제외
+# *.sh (전체 제외 대신 필요한 것만 제외하거나, 러너 실행 파일만 지정)
 
 # --- Database ---
 *.db
@@ -27,3 +26,15 @@ venv/
 *secret.yaml
 *.pem
 *.key
+
+# --- GitHub Actions Runner (추가됨) ---
+actions-runner/
+_diag/
+*.log
+*.json
+reports/
+ 
+# --- Exceptions (무시하지 않을 소중한 파일들) ---
+!deployments/*.yaml
+!k3s/**/*.yaml
+!.github/scripts/*.py
