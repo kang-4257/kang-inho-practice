@@ -35,7 +35,7 @@ def main():
     4. 보안 강화를 위한 추가적인 Best Practice(예: 멀티 스테이지 빌드, Root 권한 제한 등)를 제안할 것.
 
     [스캔 결과 데이터]
-    {raw_data}
+    {scan_result}
     """
     
     try:
