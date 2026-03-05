@@ -1,0 +1,68 @@
+name: DevSecOps-Pipeline-Auto-Scan
+
+# 메인이나 백업 브랜치에 푸시하면 자동으로 돌아가게 설정
+on:
+  push:
+    branches: [ "main", "backup" ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 내 깃허브 코드 가져오기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Trivy로 보안 스캔 돌리기 (결과는 파일로 저장)
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          output: 'trivy-report.txt'
+          severity: 'CRITICAL,HIGH'
+
+      # 3. Gemini한테 스캔 결과 보내서 분석 맡기기
+      - name: Gemini AI Analysis
+        id: gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # 스캔 결과 읽어오기
+          REPORT_DATA=$(cat trivy-report.txt)
+          
+          # Gemini API 호출 (보안 취약점 해결책 물어보기)
+          # 실제 API 호출을 위해 curl 사용
+          RESPONSE=$(curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"contents\": [{
+                \"parts\":[{
+                  \"text\": \"아래 Trivy 보안 스캔 결과를 분석해서 핵심 요약이랑 조치 방법을 한국어로 알려줘:\n\n$REPORT_DATA\"
+                }]
+              }]
+            }")
+          
+          # 결과에서 텍스트만 추출해서 환경 변수에 저장
+          # (jq가 설치되어 있으므로 결과 가공)
+          AI_COMMENT=$(echo $RESPONSE | jq -r '.candidates[0].content.parts[0].text')
+          
+          # GITHUB_ENV에 저장해서 다음 단계에서 쓰게 만듦
+          echo "ANALYSIS<<EOF" >> $GITHUB_ENV
+          echo "$AI_COMMENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      # 4. 분석 결과를 이슈 탭에 자동으로 등록
+      - name: Create Issue with Result
+        uses: imjohnbo/issue-action@v3
+        with:
+          title: "🚨 [보안 알림] 취약점 스캔 및 Gemini 조치 가이드"
+          body: |
+            ## 🔍 Trivy + Gemini 분석 결과
+            
+            ${{ env.ANALYSIS }}
+            
+            ---
+            *담당자: @${{ github.actor }}*
+            *결과 확인 후 조치 완료 시 이슈를 닫아주세요.*
+          token: ${{ secrets.GITHUB_TOKEN }}
