@@ -13,16 +13,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Trivy를 이용한 보안 스캔 (파일로 저장)
+      # 2. Trivy 보안 스캔
       - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          output: 'trivy-report.txt' # 결과를 파일로 저장
+          severity: 'CRITICAL,HIGH'
+
+      # 결과 확인용
+      - name: Check Trivy Report
         run: |
-          # 설치 및 스캔 실행 (결과를 trivy-report.txt에 저장)
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-          trivy fs --severity CRITICAL,HIGH --format table . > trivy-report.txt
-          
-          # 로그 확인용 (파일이 잘 생성됐는지 터미널에 출력)
-          echo "--- Trivy Scan Result ---"
-          cat trivy-report.txt
+          if [ -s trivy-report.txt ]; then
+            echo "--- Trivy 스캔 성공 ---"
+            head -n 20 trivy-report.txt # 너무 길면 앞부분만 출력
+          else
+            echo "--- Trivy 스캔 결과 없음 ---"
+          fi
 
       # 3. Gemini 분석 전에 필요한 라이브러리 설치
       - name: Install Python Dependencies
@@ -36,7 +45,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-        
+
           python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
 
           # [검증 로직] 파일이 비어있는지 체크하여 이슈 생성 실패 방지
