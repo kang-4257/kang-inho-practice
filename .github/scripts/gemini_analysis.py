@@ -11,6 +11,22 @@ def main():
     
     # 제미나이 설정
     genai.configure(api_key=api_key)
+
+    print("--- 사용 가능한 모델 목록 ---")
+    try:
+
+        for m in genai.list_models():
+
+            if 'generateContent' in m.supported_generation_methods:
+                print(f"모델 이름: {m.name}")
+                print(f"버전: {m.display_name}")
+                print(f"설명: {m.description}")
+                print("-" * 30)
+    except Exception as e:
+        print(f"[에러] 목록 가져오기 실패: {e}")
+
+if __name__ == "__main__":
+    check()
     model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
     # 트리비가 스캔해서 만들어준 파일 열기
