@@ -18,13 +18,14 @@ def main():
     # 3. 트리비 리포트 읽기
     try:
         with open("trivy-report.txt", "r", encoding="utf-8") as f:
-            scan_result = f.read(3000) 
+            scan_result = f.read() 
     except FileNotFoundError:
         print("[에러] trivy-report.txt 파일 없음.", file=sys.stderr)
         return
 
     # 날짜와 시간 생성
-    current_time = datetime.datetime.now().strftime("%Y년 %m월 %d일 %H시 %M분")
+    kst_now = datetime.datetime.now() + datetime.timedelta(hours=9)
+    current_time = kst_now.strftime("%Y년 %m월 %d일 %H시 %M분")
 
     # 4. 분석 요청
     prompt = f"""
