@@ -25,3 +25,5 @@ EXPOSE 8000
 
 # 8. 앱 실행 명령
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+#test
