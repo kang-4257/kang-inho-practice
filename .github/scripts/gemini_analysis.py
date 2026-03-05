@@ -10,38 +10,46 @@ def main():
     
     genai.configure(api_key=api_key)
 
-    # 2. 사용 가능한 모델 목록 출력
-    print("--- 사용 가능한 모델 목록 ---")
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                print(f"모델 이름: {m.name}")
-    except Exception as e:
-        print(f"[에러] 목록 가져오기 실패: {e}")
 
-    # 3. 제미나이 설정
-    model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
-    # 4. 트리비 리포트 읽기
+    # 2. 제미나이 설정
+    model = genai.GenerativeModel('gemini-2.5-flash')
+
+    # 3. 트리비 리포트 읽기
     try:
         with open("trivy-report.txt", "r") as f:
-            # 쿼터 방어를 위해 1000자만 읽기
-            scan_result = f.read(1000) 
+            scan_result = f.read(2000) 
     except FileNotFoundError:
         print("[에러] trivy-report.txt 파일 없음.")
         return
 
-    # 5. 분석 요청
-    prompt = f"보안 전문가로서 아래 결과 요약하고 Dockerfile 수정 제안해줘.\n\n{scan_result}"
+    # 4. 분석 요청
+    prompt = f"""
+    당신은 시니어 DevSecOps 엔지니어입니다. 
+    다음 Trivy 보안 스캔 결과를 바탕으로 '보안 취약점 개선 권고안'을 작성하세요.
+
+    [지시 사항]
+    1. 가장 위험한(Critical, High) 항목 3가지를 우선 선정할 것.
+    2. 각 취약점의 원인과 영향도를 한국어로 쉽게 설명할 것.
+    3. 구체적인 'Dockerfile 수정 예시'를 (Before/After) 형태로 포함할 것.
+    4. 보안 강화를 위한 추가적인 Best Practice(예: 멀티 스테이지 빌드, Root 권한 제한 등)를 제안할 것.
+
+    [스캔 결과 데이터]
+    {raw_data}
+    """
     
     try:
+        # 분석 실행
+        print("[정보] 리포트 분석 중...")
         response = model.generate_content(prompt)
+        
+        # 결과 저장
         with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
             f.write(response.text)
-        print("[성공] 분석 완료!")
+        print("✅ Gemini 분석 완료.")
+        
     except Exception as e:
-        print(f"[에러] 호출 실패: {e}")
-
+        print(f"[에러] 분석 실패: {e}")
 
 if __name__ == "__main__":
     main()
