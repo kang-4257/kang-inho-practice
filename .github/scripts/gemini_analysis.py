@@ -1,61 +1,47 @@
 import os
 import google.generativeai as genai
 
-# 깃허브 액션에서 돌아갈 보안 분석
-def main():
-    # 저장해둔 API 키 가져오기
+def start_analysis():
+    # 1. API 키 로드
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         print("[에러] GEMINI_API_KEY 누락됨.")
-        return
-    
-    # 제미나이 설정
+        return 
+
     genai.configure(api_key=api_key)
 
+    # 2. 사용 가능한 모델 목록 출력 (디버깅용)
     print("--- 사용 가능한 모델 목록 ---")
     try:
-
-        for m in genai.list_models():
-
-            if 'generateContent' in m.supported_generation_methods:
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
                 print(f"모델 이름: {m.name}")
-                print(f"버전: {m.display_name}")
-                print(f"설명: {m.description}")
-                print("-" * 30)
-    except Exception as e:
+except Exception as e:
         print(f"[에러] 목록 가져오기 실패: {e}")
 
-if __name__ == "__main__":
-    check()
+    # 3. 제미나이 설정 (2.0 모델)
     model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
-    # 트리비가 스캔해서 만들어준 파일 열기
+    # 4. 트리비 리포트 읽기
     try:
         with open("trivy-report.txt", "r") as f:
-            # 앞부분 3000자만 읽어서 토큰 제한 회피
+            # 쿼터 방어를 위해 1000자만 읽기
             scan_result = f.read(1000) 
     except FileNotFoundError:
         print("[에러] trivy-report.txt 파일 없음.")
         return
 
-    prompt = f"""
-    보안 전문가로서 다음 Trivy 스캔 결과를 분석해줘.
-    중요도(Critical, High)가 높은 항목을 우선으로 리포트를 작성할 것.
-    취약점의 원인 및 Dockerfile 수정 예시를 반드시 포함할 것.
-    개수에 상관없이 진짜 위험한 건 다 알려주되, 너무 많으면 핵심적인 것 위주로 깔끔하게 정리할 것.
+    # 5. 분석 요청
+    prompt = f"보안 전문가로서 아래 결과 요약하고 Dockerfile 수정 제안해줘. \n\n{scan_result}"
+    
+    try:
+        response = model.generate_content(prompt)
+        with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
+            f.write(response.text)
+        print("[성공] 분석 완료!")
+    except Exception as e:
+        print(f"[에러] 호출 실패: {e}")
 
-    스캔 결과 데이터:
-    {scan_result}
-    """
-    
-    # 제미나이 답변 생성
-    response = model.generate_content(prompt)
-    
-    # 분석 결과를 파일로 저장
-    with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
-        f.write(response.text)
-    
-    print("분석 및 보고서 작성 완료.")
 
 if __name__ == "__main__":
-    main()
+    start_analysis()
