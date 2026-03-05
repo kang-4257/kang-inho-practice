@@ -22,10 +22,13 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          ignore-unfixed: true
+          scan-ref: '.'          # 현재 폴더 전체 스캔
+          ignore-unfixed: false  # 해결책이 없는 취약점도 일단 보고
           format: 'table'
-          output: 'trivy-report.txt' # 결과를 파일로 저장
+          output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH'
+          # 취약점뿐만 아니라 설정 오류(Config)와 비밀 정보 노출(Secret)도 탐색
+          scanners: 'vuln,config,secret'
 
       # 결과 확인용
       - name: Check Trivy Report
