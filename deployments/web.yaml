@@ -15,15 +15,15 @@ spec:
     spec:
       containers:
       - name: fastapi
-        image: team02-app:v3.1
+        image: ongf/team02-app:latest
         imagePullPolicy: Always  # 1. IfNotPresent를 Always로 변경 (보안/신뢰성)
         # ---------------------------------------------------------
         # 2. 보안 컨텍스트 추가
         securityContext:         
-          allowPrivilegeEscalation: false  # 권한 상승 금지
-          runAsNonRoot: true               # root 계정 실행 금지
+          allowPrivilegeEscalation: false  
+          runAsNonRoot: true               
           capabilities:
-            drop: ["ALL"]                  # 불필요한 리눅스 기능 제거 
+            drop: ["ALL"]                  
         # 
         # ---------------------------------------------------------
         # 3. 가용성 향상 (점수 추가 포인트)
