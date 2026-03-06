@@ -17,6 +17,8 @@ spec:
       - name: fastapi
         image: ongf/team02-app:latest
         imagePullPolicy: Always  # 1. IfNotPresent를 Always로 변경 (보안/신뢰성)
+        ports:
+        - containerPort: 8000
         # ---------------------------------------------------------
         # 2. 보안 컨텍스트 추가
         securityContext:         
