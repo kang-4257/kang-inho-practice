@@ -30,7 +30,7 @@ spec:
             path: /
             port: 8000
           initialDelaySeconds: 5
-        periodSeconds: 10
+          periodSeconds: 10
         resources:
           limits:
             cpu: "200m"         
@@ -38,7 +38,7 @@ spec:
           requests:
             cpu: "100m"         
             memory: "128Mi"
-        env:
+        env:  
         - name: DB_USER
           value: "postgres"
         - name: DB_PASSWORD
@@ -51,19 +51,15 @@ spec:
         - name: DB_PORT
           value: "5432"
         - name: DB_NAME
-          value: "board"
-        
+          value: "board"          
         - name: GEMINI_API_KEY
           valueFrom:
             secretKeyRef:
               name: web-secret
               key: api-key
-        # --- 볼륨 마운트 위치 (컨테이너 내부) ---
-        volumeMounts:
+        volumeMounts:  
         - name: db-persistent-storage
-          mountPath: /app/database
-      
-      # --- 실제 볼륨 정의 위치 (컨테이너 외부) ---
+          mountPath: /app/database            
       volumes:
       - name: db-persistent-storage
         hostPath:
