@@ -204,6 +204,6 @@ async def test_gemini():
         return {"error": str(e)}
 
 
-@app.get("/login", response_class=HTMLResponse)
+@app.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
