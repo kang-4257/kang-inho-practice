@@ -16,11 +16,11 @@ spec:
       containers:
       - name: fastapi
         image: ongf/team02-app:latest
-        imagePullPolicy: Always  # 1. IfNotPresent를 Always로 변경 (보안/신뢰성)
+        imagePullPolicy: Always  # IfNotPresent를 Always로 변경 (보안/신뢰성)
         ports:
         - containerPort: 8000
         # ---------------------------------------------------------
-        # 2. 보안 컨텍스트 추가
+        # 보안 컨텍스트 추가
         securityContext:         
           allowPrivilegeEscalation: false  
           runAsNonRoot: true
@@ -29,7 +29,7 @@ spec:
             drop: ["ALL"]                  
         # 
         # ---------------------------------------------------------
-        # 3. 가용성 향상 (점수 추가 포인트)
+        # 가용성 향상
         readinessProbe:
           httpGet:
             path: /
@@ -66,6 +66,19 @@ spec:
               key: api-key
         ports:
         - containerPort: 8000
+
+        # 컨테이너 내부의 저장소 연결 (컨테이너 설정 안에 포함)
+        volumeMounts:                      
+        - name: db-persistent-storage
+          mountPath: /app/database         # 앱이 데이터를 저장하는 폴더
+        # ---------------------------------------------------------
+
+      # 실제 서버 하드의 저장소 정의 (containers: 와 같은 레벨)
+        volumes:                             
+        - name: db-persistent-storage
+          hostPath:
+            path: /home/user/kang-inho/db-data  # 서버(Ubuntu) 실제 폴더
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
