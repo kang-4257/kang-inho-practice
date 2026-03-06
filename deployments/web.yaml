@@ -16,33 +16,27 @@ spec:
       containers:
       - name: fastapi
         image: ongf/team02-app:latest
-        imagePullPolicy: Always  # IfNotPresent를 Always로 변경 (보안/신뢰성)
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
-        # ---------------------------------------------------------
-        # 보안 컨텍스트 추가
-        securityContext:         
+        securityContext:          
           allowPrivilegeEscalation: false  
           runAsNonRoot: true
-          runAsUser: 1000               
+          runAsUser: 1000                
           capabilities:
-            drop: ["ALL"]                  
-        # 
-        # ---------------------------------------------------------
-        # 가용성 향상
+            drop: ["ALL"]                   
         readinessProbe:
           httpGet:
             path: /
             port: 8000
           initialDelaySeconds: 5
-          periodSeconds: 10
-        # ---------------------------------------------------------
+        periodSeconds: 10
         resources:
           limits:
-            cpu: "200m"        
+            cpu: "200m"         
             memory: "256Mi"
           requests:
-            cpu: "100m"        
+            cpu: "100m"         
             memory: "128Mi"
         env:
         - name: DB_USER
@@ -58,27 +52,23 @@ spec:
           value: "5432"
         - name: DB_NAME
           value: "board"
-        # 제미나이 API 키
+        
         - name: GEMINI_API_KEY
           valueFrom:
             secretKeyRef:
               name: web-secret
               key: api-key
-        ports:
-        - containerPort: 8000
-
-        # 컨테이너 내부의 저장소 연결 (컨테이너 설정 안에 포함)
-        volumeMounts:                      
+        # --- 볼륨 마운트 위치 (컨테이너 내부) ---
+        volumeMounts:
         - name: db-persistent-storage
-          mountPath: /app/database         # 앱이 데이터를 저장하는 폴더
-        # ---------------------------------------------------------
-
-      # 실제 서버 하드의 저장소 정의 (containers: 와 같은 레벨)
-        volumes:                             
-        - name: db-persistent-storage
-          hostPath:
-            path: /home/user/kang-inho/db-data  # 서버(Ubuntu) 실제 폴더
-            type: DirectoryOrCreate
+          mountPath: /app/database
+      
+      # --- 실제 볼륨 정의 위치 (컨테이너 외부) ---
+      volumes:
+      - name: db-persistent-storage
+        hostPath:
+          path: /home/user/kang-inho/db-data
+          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
@@ -92,4 +82,4 @@ spec:
   ports:
   - port: 8000
     targetPort: 8000
-    nodePort: 30080  
+    nodePort: 30080
