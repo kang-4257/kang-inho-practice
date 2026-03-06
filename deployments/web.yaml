@@ -23,7 +23,8 @@ spec:
         # 2. 보안 컨텍스트 추가
         securityContext:         
           allowPrivilegeEscalation: false  
-          runAsNonRoot: true               
+          runAsNonRoot: true
+          runAsUser: 1000               
           capabilities:
             drop: ["ALL"]                  
         # 
