@@ -8,6 +8,14 @@ import os
 from google import genai
 from dotenv import load_dotenv
 from typing import List
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+templates = Jinja2Templates(directory="templates")
 
 load_dotenv()
 # --- DB 연결 설정 ---
@@ -92,18 +100,9 @@ def get_db():
 # --- API 구현 ---
 
 # 0. 서버 상태 및 DB 연결 테스트
-@app.get("/")
-def read_root():
-    db = None
-    try:
-        db = SessionLocal()
-        db.execute(text("SELECT 1")) 
-        return {"message": "Hello World", "db_status": "connected"}
-    except Exception as e:
-        return {"message": "Hello World", "db_status": f"error: {str(e)}"}
-    finally:
-        if db:
-            db.close()
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 # 1. 회원가입 (POST /register)
 @app.post("/register")
@@ -201,3 +200,8 @@ async def test_gemini():
         return {"gemini_response": response.text}
     except Exception as e:
         return {"error": str(e)}
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
