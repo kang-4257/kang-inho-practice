@@ -8,7 +8,7 @@ on:
       - 'Dockerfile'
       - 'requirements.txt'
       - '.github/**'
-      - 'deployments/**'  # 쿠버네티스 설정 변경 시에도 작동
+      - 'deployments/**'  
       - 'k3s/**'
 
   workflow_dispatch: # 수동 실행 버튼    
@@ -92,7 +92,14 @@ jobs:
       # 9. k3s 클러스터에 최종 배포
       - name: Deploy to K3s
         run: |
-          # deployments 폴더 내의 RBAC, NetworkPolicy, Deployment 모두 적용
+          # 1. web 네임스페이스가 없으면 생성 (있으면 유지)
+          kubectl create namespace web --dry-run=client -o yaml | kubectl apply -f -
+
+          # 2. deployments 폴더 안의 모든 설정(web.yaml 등) 적용
           kubectl apply -f deployments/
-          # 새로운 이미지 적용을 위해 재시작
-          kubectl rollout restart deployment fastapi-web
+          
+          # 3. 'web' 네임스페이스에 있는 'fastapi-web'을 재시작
+          kubectl rollout restart deployment fastapi-web -n web
+          
+          # 4. 배포가 안정적으로 완료될 때까지 대기 및 상태 확인
+          kubectl rollout status deployment fastapi-web -n web
