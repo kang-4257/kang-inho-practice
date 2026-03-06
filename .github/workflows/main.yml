@@ -75,7 +75,7 @@ jobs:
           labels: |
             security
             automated
-        token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 8. 도커 허브에 이미지 업로드 (배포용)
       - name: Push to Docker Hub
