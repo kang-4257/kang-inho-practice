@@ -10,8 +10,10 @@ on:
       - '.github/**'
       - 'deployments/**'  
       - 'k3s/**'
-
-  workflow_dispatch: # 수동 실행 버튼    
+      - 'static/**'    
+      - 'templates/**' 
+      - 'app/**'
+   
 
 jobs:
   security-and-deploy:
