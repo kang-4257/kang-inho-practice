@@ -9,9 +9,12 @@ from google import genai
 from dotenv import load_dotenv
 from typing import List
 from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 from fastapi.responses import HTMLResponse
+
+app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -36,7 +39,7 @@ Base = declarative_base()
 # bcrypt 알고리즘을 사용한 비밀번호 암호화 설정 (버전 이슈 해결을 위해 내부 로직에서 처리 권장)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-app = FastAPI()
+
 
 # 최신 google-genai SDK 적용
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
