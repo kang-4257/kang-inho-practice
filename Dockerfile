@@ -16,8 +16,8 @@ USER appuser
 COPY --chown=appuser:appuser requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
-# 6. 소스 코드 복사 (보안상 .env는 복사하지 않음)
-COPY --chown=appuser:appuser app/ ./app/
+# 6. 소스 코드 복사
+COPY --chown=appuser:appuser . .
 
 # 7. 실행 경로 추가 및 포트 노출
 ENV PATH="/home/appuser/.local/bin:${PATH}"

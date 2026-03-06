@@ -17,8 +17,15 @@ load_dotenv()
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")  
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
+STATIC_DIR = os.path.join(ROOT_DIR, "static")
+TEMPLATES_DIR = os.path.join(ROOT_DIR, "templates")
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static") 
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
   
 # --- DB 연결 설정 ---
 DB_USER = os.getenv("DB_USER", "postgres")
