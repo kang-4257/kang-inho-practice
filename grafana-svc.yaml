@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: kube-stack
+    meta.helm.sh/release-namespace: monitoring
+  creationTimestamp: "2026-03-06T00:53:00Z"
+  labels:
+    app.kubernetes.io/instance: kube-stack
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/version: 12.4.0
+    helm.sh/chart: grafana-11.3.0
+  name: kube-stack-grafana
+  namespace: monitoring
+  resourceVersion: "22043"
+  uid: cf0e1a6d-3f98-4185-baaf-7a042358eacc
+spec:
+  clusterIP: 10.43.153.245
+  clusterIPs:
+  - 10.43.153.245
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-web
+    nodePort: 30000
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app.kubernetes.io/instance: kube-stack
+    app.kubernetes.io/name: grafana
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

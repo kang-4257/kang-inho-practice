@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2026-03-06T06:15:36Z"
+  labels:
+    app: polaris
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/instance: polaris
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: polaris
+    app.kubernetes.io/part-of: polaris
+    app.kubernetes.io/version: 5.19.0
+    component: dashboard
+    helm.sh/chart: polaris-5.19.0
+  name: polaris-dashboard
+  namespace: polaris
+  resourceVersion: "23626"
+  uid: 1fe9ff2d-92a2-4e0c-a843-cd90d3cfbf2d
+spec:
+  clusterIP: 10.43.164.15
+  clusterIPs:
+  - 10.43.164.15
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 30081
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: polaris
+    component: dashboard
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
