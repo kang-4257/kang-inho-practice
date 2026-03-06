@@ -7,8 +7,11 @@ on:
     paths:
       - 'Dockerfile'
       - 'requirements.txt'
-      - '.github/scripts/**'
+      - '.github/**'
       - 'deployments/**'  # 쿠버네티스 설정 변경 시에도 작동
+      - 'k3s/**'
+
+  workflow_dispatch: # 수동 실행 버튼    
 
 jobs:
   security-and-deploy:
