@@ -1,7 +1,8 @@
 import os
 import google.generativeai as genai
 import datetime
-import sys 
+import sys
+import pytz 
 
 def main():
     # 1. API 키 로드
@@ -24,7 +25,8 @@ def main():
         return
 
     # 날짜와 시간 생성
-    kst_now = datetime.datetime.now() + datetime.timedelta(hours=9)
+    kst = pytz.timezone('Asia/Seoul')
+    kst_now = datetime.datetime.now(kst)
     current_time = kst_now.strftime("%Y년 %m월 %d일 %H시 %M분")
 
     # 4. 분석 요청
