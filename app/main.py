@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Depends
+# --- (1) 모든 import 문 ---
+from fastapi import FastAPI, HTTPException, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -7,20 +8,18 @@ from passlib.context import CryptContext
 import os
 from google import genai
 from dotenv import load_dotenv
-from typing import List
-from fastapi import FastAPI, Request
+from typing import List  
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-
+from fastapi.templating import Jinja2Templates  
 from fastapi.responses import HTMLResponse
+
+load_dotenv()
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
+app.mount("/static", StaticFiles(directory="static"), name="static")  
 templates = Jinja2Templates(directory="templates")
-
-load_dotenv()
+  
 # --- DB 연결 설정 ---
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD") 
