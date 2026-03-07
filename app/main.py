@@ -21,8 +21,8 @@ app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
   
 # --- DB 연결 설정 ---
 DB_USER = os.getenv("DB_USER", "postgres")
