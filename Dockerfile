@@ -17,7 +17,7 @@ COPY --chown=appuser:appuser requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # 6. 소스 코드 복사
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser app/ .
 
 # 7. 실행 경로 추가 및 포트 노출
 ENV PATH="/home/appuser/.local/bin:${PATH}"
@@ -25,6 +25,6 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # 8. 앱 실행 명령
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 #test2
