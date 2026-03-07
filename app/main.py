@@ -108,7 +108,7 @@ def get_db():
 # 0. 서버 상태 및 DB 연결 테스트
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, db: Session = Depends(get_db)):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("login.html", {"request": request})
 
 # 1. 회원가입 (POST /register)
 @app.post("/register")
