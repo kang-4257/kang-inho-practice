@@ -1,19 +1,20 @@
 # --- (1) 모든 import 문 ---
+import os
+from pathlib import Path
+from typing import List
+
 from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
-from passlib.context import CryptContext
-import os
+from passlib.context import CryptContext  
 from google import genai
 from dotenv import load_dotenv
-from typing import List  
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates  
-from fastapi.responses import HTMLResponse
-from pathlib import Path
-
+  
 load_dotenv()
 
 app = FastAPI()
