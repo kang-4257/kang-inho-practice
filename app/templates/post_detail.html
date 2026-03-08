@@ -29,14 +29,9 @@
                 <h2>{{ post.title }}</h2>
                 <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">
                     작성자: {{ post.owner.username if post.owner else "알 수 없음" }}
+                    &nbsp;·&nbsp;
+                    작성일: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else "" }}
                 </p>
-
-                {% if post.summary %}
-                <div class="ai-summary-box">
-                    <p class="ai-label">🤖 AI 요약</p>
-                    <p style="margin:0; color:#f8fafc;">{{ post.summary }}</p>
-                </div>
-                {% endif %}
 
                 <div class="post-content">{{ post.content }}</div>
 

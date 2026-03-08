@@ -236,6 +236,11 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse(url="/", status_code=303)
     posts = db.query(Post).order_by(Post.id.desc()).all()
+    # 작성일 KST 변환
+    from datetime import timedelta
+    for post in posts:
+        if post.created_at:
+            post.created_at = post.created_at + timedelta(hours=9)
     return templates.TemplateResponse("main.html", {"request": request, "posts": posts, "current_user": user})
 
 @app.get("/write", response_class=HTMLResponse)
@@ -269,6 +274,10 @@ async def post_detail(post_id: int, request: Request, db: Session = Depends(get_
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    # 작성일 KST 변환
+    from datetime import timedelta
+    if post.created_at:
+        post.created_at = post.created_at + timedelta(hours=9)
     return templates.TemplateResponse("post_detail.html", {"request": request, "post": post, "current_user": user})
 
 @app.get("/post/{post_id}/edit", response_class=HTMLResponse)
@@ -335,6 +344,11 @@ async def admin_dashboard(request: Request, db: Session = Depends(get_db)):
     total_users = db.query(User).count()
     total_posts = db.query(Post).count()
     latest_scan = db.query(TrivyScan).order_by(TrivyScan.id.desc()).first()
+
+    # 스캔 시각 KST 변환
+    from datetime import timedelta
+    if latest_scan and latest_scan.scanned_at:
+        latest_scan.scanned_at = latest_scan.scanned_at + timedelta(hours=9)
     grafana_url = os.getenv("GRAFANA_EXTERNAL_URL", "http://localhost:30000")
 
     return templates.TemplateResponse("admin/dashboard.html", {
@@ -454,4 +468,4 @@ async def test_gemini():
         response = client.models.generate_content(model="gemini-2.0-flash-lite", contents="HI")
         return {"gemini_response": response.text}
     except Exception as e:
-        return {"error": str(e)}       
+        return {"error": str(e)}      
