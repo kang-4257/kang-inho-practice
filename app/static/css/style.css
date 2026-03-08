@@ -238,25 +238,53 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   margin-top: 2rem;
 }
 
+/* 유저 정보 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+.user-name { color: var(--text-main); font-size: 0.9rem; font-weight: 600; }
 
+/* 게시글 상세 */
+.ai-summary-box {
+    background: #0f172a;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--accent);
+}
+.ai-label { color: #94a3b8; font-size: 0.8rem; margin: 0 0 0.3rem; }
+.post-content {
+    color: #cbd5e1;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    margin-bottom: 2rem;
+}
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
 
+/* 삭제 버튼 */
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-danger:hover { background: #dc2626; }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* 작은 버튼 */
+.btn-sm { padding: 6px 12px !important; font-size: 0.8rem; }

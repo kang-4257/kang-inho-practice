@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ post.title }} - Security Board</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-container">
@@ -12,40 +12,46 @@
                 <span class="shield-icon">🛡️</span>
                 <h2>Security Board</h2>
             </div>
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
             <ul class="nav-links">
-                <li><a href="/main">📊 대시보드</a></li>
-                <li><a href="#">🕵️ 보안 로그</a></li>
-                <li><a href="#">👥 사용자 관리</a></li>
+                <li><a href="/main">🏠 전체 게시판</a></li>
+                <li><a href="/my-posts">📝 내가 쓴 글</a></li>
+                <li><a href="/write">✏️ 글쓰기</a></li>
             </ul>
             <div class="sidebar-footer">
-                <a href="/logout" class="btn-logout">로그아웃</a>
+                <a href="/logout" class="btn-logout">🚪 로그아웃</a>
             </div>
         </nav>
 
         <main class="content">
             <div class="write-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                    <h2>{{ post.title }}</h2>
-                    {% if post.status == "high" %}
-                        <span class="status-badge high">위험</span>
-                    {% elif post.status == "medium" %}
-                        <span class="status-badge medium">주의</span>
-                    {% else %}
-                        <span class="status-badge low">안전</span>
-                    {% endif %}
-                </div>
+                <h2>{{ post.title }}</h2>
+                <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">
+                    작성자: {{ post.owner.username if post.owner else "알 수 없음" }}
+                </p>
 
                 {% if post.summary %}
-                <div style="background:#0f172a; padding:1rem; border-radius:8px; margin-bottom:1.5rem; border-left:3px solid #10b981;">
-                    <p style="color:#94a3b8; font-size:0.8rem; margin:0 0 0.3rem;">🤖 AI 요약</p>
-                    <p style="color:#f8fafc; margin:0;">{{ post.summary }}</p>
+                <div class="ai-summary-box">
+                    <p class="ai-label">🤖 AI 요약</p>
+                    <p>{{ post.summary }}</p>
                 </div>
                 {% endif %}
 
-                <div style="color:#cbd5e1; line-height:1.8; white-space:pre-wrap;">{{ post.content }}</div>
+                <div class="post-content">{{ post.content }}</div>
 
-                <div style="margin-top:2rem;">
+                <div class="post-actions">
                     <button class="btn-secondary" onclick="location.href='/main'">← 목록으로</button>
+                    {% if current_user.id == post.owner_id %}
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn-secondary" onclick="location.href='/post/{{ post.id }}/edit'">✏️ 수정</button>
+                        <form action="/post/{{ post.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')">
+                            <button type="submit" class="btn-danger">🗑️ 삭제</button>
+                        </form>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </main>

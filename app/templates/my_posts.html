@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>게시판 - Security Board</title>
+    <title>내가 쓴 글 - Security Board</title>
     <link rel="stylesheet" href="/static/css/style.css?v=5">
 </head>
 <body class="dashboard-page">
@@ -17,8 +17,8 @@
                 <span class="user-name">{{ current_user.username }}</span>
             </div>
             <ul class="nav-links">
-                <li class="active"><a href="/main">🏠 전체 게시판</a></li>
-                <li><a href="/my-posts">📝 내가 쓴 글</a></li>
+                <li><a href="/main">🏠 전체 게시판</a></li>
+                <li class="active"><a href="/my-posts">📝 내가 쓴 글</a></li>
                 <li><a href="/write">✏️ 글쓰기</a></li>
             </ul>
             <div class="sidebar-footer">
@@ -28,7 +28,7 @@
 
         <main class="content">
             <header class="content-header">
-                <h1>전체 게시판</h1>
+                <h1>내가 쓴 글</h1>
                 <button class="btn-write" onclick="location.href='/write'">✏️ 글쓰기</button>
             </header>
 
@@ -38,22 +38,29 @@
                         <tr>
                             <th>번호</th>
                             <th>제목</th>
-                            <th>작성자</th>
-                            <th>AI 요약</th>  
+                            <th>AI 요약</th>
+                            <th>관리</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for post in posts %}
-                        <tr onclick="location.href='/post/{{ post.id }}'">
+                        <tr>
                             <td>{{ post.id }}</td>
-                            <td>{{ post.title }}</td>
-                            <td>{{ post.owner.username if post.owner else "알 수 없음" }}</td>
-                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>  
+                            <td onclick="location.href='/post/{{ post.id }}'" style="cursor:pointer;">{{ post.title }}</td>
+                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
+                            <td>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <button class="btn-secondary btn-sm" onclick="location.href='/post/{{ post.id }}/edit'">수정</button>
+                                    <form action="/post/{{ post.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')" style="margin:0;">
+                                        <button type="submit" class="btn-danger btn-sm">삭제</button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
-                                아직 게시글이 없어요. 첫 번째 글을 작성해보세요!
+                                아직 작성한 글이 없어요.
                             </td>
                         </tr>
                         {% endfor %}

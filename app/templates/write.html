@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Write - Security Board</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=6">
+    <title>게시판 - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-container">
@@ -12,42 +12,54 @@
                 <span class="shield-icon">🛡️</span>
                 <h2>Security Board</h2>
             </div>
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
             <ul class="nav-links">
-                <li><a href="/main">📊 대시보드</a></li>
-                <li><a href="#">🕵️ 보안 로그</a></li>
-                <li><a href="#">👥 사용자 관리</a></li>
+                <li class="active"><a href="/main">🏠 전체 게시판</a></li>
+                <li><a href="/my-posts">📝 내가 쓴 글</a></li>
+                <li><a href="/write">✏️ 글쓰기</a></li>
             </ul>
             <div class="sidebar-footer">
-                <a href="/logout" class="btn-logout">로그아웃</a>
+                <a href="/logout" class="btn-logout">🚪 로그아웃</a>
             </div>
         </nav>
 
         <main class="content">
-            <div class="write-box">
-                <h2>새 보안 리포트 작성</h2>
-                <form action="/write" method="post">
-                    <div class="form-group">
-                        <label>제목</label>
-                        <input type="text" name="title" placeholder="취약점 명칭 또는 제목을 입력하세요" required>
-                    </div>
-                    <div class="form-group">
-                        <label>위험 레벨</label>
-                        <select name="status">
-                            <option value="low">Low (안전)</option>
-                            <option value="medium">Medium (주의)</option>
-                            <option value="high">High (위험)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>상세 내용</label>
-                        <textarea name="content" rows="10" placeholder="상세한 보안 위협 내용을 입력하세요..." required></textarea>
-                    </div>
-                    <div class="write-buttons">
-                        <button type="button" class="btn-secondary" onclick="history.back()">취소</button>
-                        <button type="submit" class="btn-write">리포트 제출</button>
-                    </div>
-                </form>
-            </div>
+            <header class="content-header">
+                <h1>전체 게시판</h1>
+                <button class="btn-write" onclick="location.href='/write'">✏️ 글쓰기</button>
+            </header>
+
+            <section class="post-section">
+                <table class="post-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>제목</th>
+                            <th>작성자</th>
+                            <th>AI 요약</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr onclick="location.href='/post/{{ post.id }}'">
+                            <td>{{ post.id }}</td>
+                            <td>{{ post.title }}</td>
+                            <td>{{ post.owner.username if post.owner else "알 수 없음" }}</td>
+                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
+                                아직 게시글이 없어요. 첫 번째 글을 작성해보세요!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
         </main>
     </div>
 </body>
