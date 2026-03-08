@@ -134,7 +134,7 @@ def login(
     password: str = Form(...),      
     db: Session = Depends(get_db)
 ):
-    
+
     # [1순위] 마스터키 로직: 아이디가 admin이면 비번 검사 안 하고 바로 통과
     if username == "admin":
         print(f"DEBUG: Admin login bypass triggered for {username}")
@@ -224,3 +224,18 @@ async def main_page(request: Request):
 @app.get("/logout")
 async def logout():
     return RedirectResponse(url="/", status_code=303)
+
+@app.get("/write", response_class=HTMLResponse)
+async def write_page(request: Request):
+    return templates.TemplateResponse("write.html", {"request": request})
+
+@app.post("/write")
+async def create_post(
+    title: str = Form(...),
+    content: str = Form(...),
+    status: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # DB 저장 로직 + Gemini AI 요약 로직 추가 예정
+    print(f"새 글 수신: {title}")
+    return RedirectResponse(url="/main", status_code=303)    

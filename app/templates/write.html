@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Write - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
+</head>
+<body class="dashboard-body">
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" onclick="location.href='/main'" style="cursor:pointer">🛡️ Security <span>Board</span></div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="write-box">
+                <h2>새 보안 리포트 작성</h2>
+                <form action="/write" method="post">
+                    <div class="form-group">
+                        <label>제목</label>
+                        <input type="text" name="title" placeholder="취약점 명칭 또는 제목을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label>위험 레벨</label>
+                        <select name="status">
+                            <option value="low">Low (안전)</option>
+                            <option value="medium">Medium (주의)</option>
+                            <option value="high">High (위험)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>상세 내용</label>
+                        <textarea name="content" rows="10" placeholder="상세한 보안 위협 내용을 입력하세요..." required></textarea>
+                    </div>
+                    <div class="write-buttons">
+                        <button type="button" class="btn-secondary" onclick="history.back()">취소</button>
+                        <button type="submit" class="btn-primary">리포트 제출</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
