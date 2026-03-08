@@ -211,4 +211,11 @@ async def test_gemini():
 @app.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
-# test
+
+@app.get("/main", response_class=HTMLResponse)
+async def main_page(request: Request):
+    return templates.TemplateResponse("main.html", {"request": request})
+
+@app.get("/logout")
+async def logout():
+    return RedirectResponse(url="/", status_code=303)

@@ -1,3 +1,4 @@
+/*로그인*/
 :root {
   --bg-color: #0f172a;
   --card-bg: #1e293b;
@@ -74,3 +75,79 @@ input:focus { border-color: var(--accent); }
 .login-footer { margin-top: 1.5rem; }
 .login-footer a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
 .login-footer a:hover { color: var(--accent); }
+
+/* 대시보드 레이아웃 */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--card-bg);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.content {
+    flex: 1;
+    padding: 2.5rem;
+    overflow-y: auto;
+    background: var(--bg-color);
+}
+
+/* 게시판 테이블 디자인 */
+.post-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.post-table th, .post-table td {
+    padding: 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.post-table th {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.post-table tbody tr { cursor: pointer; transition: 0.2s; }
+.post-table tbody tr:hover { background: rgba(255,255,255,0.05); }
+
+/* 버튼 및 배지 */
+.btn-write {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-badge.high { background: #ef4444; color: white; }
+.status-badge.low { background: #3b82f6; color: white; }
+
+.btn-logout {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.btn-logout:hover { color: #ef4444; }

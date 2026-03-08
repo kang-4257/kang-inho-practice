@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="/main">📊 대시보드</a></li>
+                <li><a href="#">🕵️ 보안 로그</a></li>
+                <li><a href="#">👥 사용자 관리</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="/logout" class="btn-logout">로그아웃</a>
+            </div>
+        </nav>
+
+        <main class="content">
+            <header class="content-header">
+                <h1>보안 위협 게시판</h1>
+                <button class="btn-write" onclick="location.href='/write'">➕ 새 게시글 작성</button>
+            </header>
+
+            <section class="post-section">
+                <table class="post-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>제목</th>
+                            <th>작성자</th>
+                            <th>날짜</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="location.href='/post/1'">
+                            <td>1</td>
+                            <td>SQL 인젝션 공격 시도 감지됨</td>
+                            <td>Admin</td>
+                            <td>2026-03-08</td>
+                            <td><span class="status-badge high">위험</span></td>
+                        </tr>
+                        <tr onclick="location.href='/post/2'">
+                            <td>2</td>
+                            <td>신규 방화벽 규칙 업데이트 안내</td>
+                            <td>System</td>
+                            <td>2026-03-07</td>
+                            <td><span class="status-badge low">안전</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
