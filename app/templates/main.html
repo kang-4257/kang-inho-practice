@@ -21,7 +21,7 @@
                 <li><a href="/my-posts">📝 내가 쓴 글</a></li>
                 <li><a href="/write">✏️ 글쓰기</a></li>
                 <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
-            </ul>  
+            </ul>
         </nav>
 
         <main class="content">
@@ -37,6 +37,7 @@
                             <th>번호</th>
                             <th>제목</th>
                             <th>작성자</th>
+                            <th>작성일</th>
                             <th>AI 요약</th>
                         </tr>
                     </thead>
@@ -46,11 +47,18 @@
                             <td>{{ post.id }}</td>
                             <td>{{ post.title }}</td>
                             <td>{{ post.owner.username if post.owner else "알 수 없음" }}</td>
+                            <td style="color:#94a3b8; font-size:0.85rem;">
+                                {% if post.created_at %}
+                                {{ post.created_at.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
                             <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            <td colspan="5" style="text-align:center; color:#94a3b8; padding:2rem;">
                                 아직 게시글이 없어요. 첫 번째 글을 작성해보세요!
                             </td>
                         </tr>

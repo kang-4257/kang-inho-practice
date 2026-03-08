@@ -21,7 +21,7 @@
                 <li class="active"><a href="/my-posts">📝 내가 쓴 글</a></li>
                 <li><a href="/write">✏️ 글쓰기</a></li>
                 <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
-            </ul>  
+            </ul>
         </nav>
 
         <main class="content">
@@ -36,6 +36,7 @@
                         <tr>
                             <th>번호</th>
                             <th>제목</th>
+                            <th>작성일</th>
                             <th>AI 요약</th>
                             <th>관리</th>
                         </tr>
@@ -45,6 +46,13 @@
                         <tr>
                             <td>{{ post.id }}</td>
                             <td onclick="location.href='/post/{{ post.id }}'" style="cursor:pointer;">{{ post.title }}</td>
+                            <td style="color:#94a3b8; font-size:0.85rem;">
+                                {% if post.created_at %}
+                                {{ post.created_at.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
                             <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
                             <td>
                                 <div style="display:flex; gap:0.5rem;">
@@ -57,7 +65,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            <td colspan="5" style="text-align:center; color:#94a3b8; padding:2rem;">
                                 아직 작성한 글이 없어요.
                             </td>
                         </tr>
