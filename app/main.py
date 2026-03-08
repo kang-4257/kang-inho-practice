@@ -134,20 +134,27 @@ def login(
     password: str = Form(...),      
     db: Session = Depends(get_db)
 ):
-
+    
+    # [1순위] 마스터키 로직: 아이디가 admin이면 비번 검사 안 하고 바로 통과
     if username == "admin":
+        print(f"DEBUG: Admin login bypass triggered for {username}")
         return RedirectResponse(url="/main", status_code=303)
 
+    # [2순위] 일반 유저 DB 조회 로직
     user = db.query(User).filter(User.username == username).first()
-          
+    
+    # 아이디가 없는 경우
     if not user:
         return RedirectResponse(url="/?error=notfound", status_code=303)
     
+    # 비밀번호 검증 (bcrypt 72바이트 커팅 적용)
     safe_pw = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
          
+    # 비밀번호가 틀린 경우
     if not pwd_context.verify(safe_pw, user.hashed_password):
         return RedirectResponse(url="/?error=invalid", status_code=303)
-          
+    
+    # 일반 유저 로그인 성공 시 메인 화면으로 이동
     response = RedirectResponse(url="/main", status_code=303)
     return response
 
