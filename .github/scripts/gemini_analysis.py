@@ -69,7 +69,7 @@ def main():
     try:
         print("[정보] Gemini 분석 중...", file=sys.stderr)
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash-lite",
             contents=prompt
         )
         final_report = response.text.strip()
