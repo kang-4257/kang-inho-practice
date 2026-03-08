@@ -57,6 +57,8 @@ spec:
             secretKeyRef:
               name: web-secret
               key: api-key
+        - name: TZ
+          value: "Asia/Seoul"
         - name: INTERNAL_API_KEY
           value: "trivy-api-key"
         - name: POLARIS_URL
@@ -83,4 +85,4 @@ spec:
   ports:
   - port: 8000
     targetPort: 8000
-    nodePort: 30080      
+    nodePort: 30080     
