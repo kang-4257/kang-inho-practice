@@ -393,6 +393,10 @@ async def admin_vulns(scan_id: int, request: Request, db: Session = Depends(get_
     if not scan:
         raise HTTPException(status_code=404, detail="스캔 기록을 찾을 수 없습니다.")
     vulns = db.query(VulnerabilityLog).filter(VulnerabilityLog.scan_id == scan_id).all()
+
+    # 심각도 순 정렬 (CRITICAL > HIGH > MEDIUM > LOW)
+    severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+    vulns = sorted(vulns, key=lambda v: severity_order.get(v.severity, 99))
     return templates.TemplateResponse("admin/vulns.html", {
         "request": request,
         "current_user": user,

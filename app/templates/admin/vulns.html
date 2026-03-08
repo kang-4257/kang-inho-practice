@@ -32,6 +32,7 @@
             <table class="post-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>CVE ID</th>
                         <th>심각도</th>
                         <th>설명</th>
@@ -40,6 +41,7 @@
                 <tbody>
                     {% for vuln in vulns %}
                     <tr>
+                        <td style="color:#94a3b8; font-size:0.85rem;">{{ loop.index }}</td>
                         <td style="font-size:0.85rem; font-family:monospace;">{{ vuln.cve_id }}</td>
                         <td>
                             {% if vuln.severity == "CRITICAL" %}
@@ -56,7 +58,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" style="text-align:center; color:#94a3b8; padding:2rem;">
+                        <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
                             CVE 데이터가 없어요.
                         </td>
                     </tr>
