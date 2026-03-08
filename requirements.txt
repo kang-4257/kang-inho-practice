@@ -4,8 +4,9 @@ jinja2
 python-multipart
 python-dotenv
 google-genai
-psycopg2-binary
-bcrypt
+psycopg2-binary  
 sqlalchemy
 passlib[bcrypt]
 bcrypt==4.0.1
+itsdangerous
+starlette
