@@ -1,9 +1,9 @@
 import os
-import google.generativeai as genai
 import datetime
 import sys
 import pytz
 import requests
+from google import genai
 
 def main():
     # API 키 확인
@@ -12,8 +12,7 @@ def main():
         print("[에러] GEMINI_API_KEY 누락", file=sys.stderr)
         return
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    client = genai.Client(api_key=api_key)
 
     # trivy 리포트 읽기
     try:
@@ -69,7 +68,10 @@ def main():
 
     try:
         print("[정보] Gemini 분석 중...", file=sys.stderr)
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
         final_report = response.text.strip()
 
         # 파일 저장 (GitHub Issue용)
