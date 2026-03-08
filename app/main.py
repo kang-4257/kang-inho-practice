@@ -382,6 +382,13 @@ async def admin_trivy(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse(url="/", status_code=303)
     scans = db.query(TrivyScan).order_by(TrivyScan.id.desc()).all()
+
+    # 스캔 시각 KST 변환
+    from datetime import timedelta
+    for scan in scans:
+        if scan.scanned_at:
+            scan.scanned_at = scan.scanned_at + timedelta(hours=9)
+
     return templates.TemplateResponse("admin/trivy.html", {"request": request, "current_user": user, "scans": scans})
 
 @app.get("/admin/trivy/{scan_id}/vulns", response_class=HTMLResponse)
@@ -447,4 +454,4 @@ async def test_gemini():
         response = client.models.generate_content(model="gemini-2.0-flash-lite", contents="HI")
         return {"gemini_response": response.text}
     except Exception as e:
-        return {"error": str(e)}         
+        return {"error": str(e)}       
