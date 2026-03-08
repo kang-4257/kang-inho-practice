@@ -88,6 +88,18 @@ class TrivyScan(Base):
     low = Column(Integer, default=0)
     report_text = Column(String, nullable=True)
     ai_guide = Column(String, nullable=True)
+    vuln_logs = relationship("VulnerabilityLog", back_populates="scan")
+
+class VulnerabilityLog(Base):
+    __tablename__ = "vulnerability_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    scan_id = Column(Integer, ForeignKey("trivy_scans.id"))
+    cve_id = Column(String, nullable=True)
+    severity = Column(String, nullable=True)
+    description = Column(String, nullable=True)
+    ai_analysis_report = Column(String, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    scan = relationship("TrivyScan", back_populates="vuln_logs")
 
 Base.metadata.create_all(bind=engine)
 
@@ -372,6 +384,22 @@ async def admin_trivy(request: Request, db: Session = Depends(get_db)):
     scans = db.query(TrivyScan).order_by(TrivyScan.id.desc()).all()
     return templates.TemplateResponse("admin/trivy.html", {"request": request, "current_user": user, "scans": scans})
 
+@app.get("/admin/trivy/{scan_id}/vulns", response_class=HTMLResponse)
+async def admin_vulns(scan_id: int, request: Request, db: Session = Depends(get_db)):
+    user = require_admin(request)
+    if not user:
+        return RedirectResponse(url="/", status_code=303)
+    scan = db.query(TrivyScan).filter(TrivyScan.id == scan_id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="스캔 기록을 찾을 수 없습니다.")
+    vulns = db.query(VulnerabilityLog).filter(VulnerabilityLog.scan_id == scan_id).all()
+    return templates.TemplateResponse("admin/vulns.html", {
+        "request": request,
+        "current_user": user,
+        "scan": scan,
+        "vulns": vulns
+    })
+
 # GitHub Actions에서 Trivy 결과 전송받는 API
 @app.post("/api/trivy-report")
 async def receive_trivy_report(
@@ -394,6 +422,18 @@ async def receive_trivy_report(
         ai_guide=body.get("ai_guide")
     )
     db.add(scan)
+    db.flush()  # scan.id 확보
+
+    # CVE별 상세 기록 저장
+    for cve in body.get("cves", []):
+        log = VulnerabilityLog(
+            scan_id=scan.id,
+            cve_id=cve.get("cve_id"),
+            severity=cve.get("severity"),
+            description=cve.get("description")
+        )
+        db.add(log)
+
     db.commit()
     return {"message": "저장 완료"}
 
@@ -403,4 +443,4 @@ async def test_gemini():
         response = client.models.generate_content(model="gemini-2.0-flash-lite", contents="HI")
         return {"gemini_response": response.text}
     except Exception as e:
-        return {"error": str(e)}          
+        return {"error": str(e)}         

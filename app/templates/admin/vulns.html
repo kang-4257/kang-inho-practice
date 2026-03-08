@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>취약점 목록 - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="user-info">
+                <span>👑</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/admin">📊 대시보드</a></li>
+                <li><a href="/admin/users">👥 유저 관리</a></li>
+                <li><a href="/admin/posts">📝 게시글 관리</a></li>
+                <li class="active"><a href="/admin/trivy">🔍 Trivy 스캔</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+        <main class="content">
+            <header class="content-header">
+                <h1>취약점 목록 - 스캔 #{{ scan.id }} ({{ scan.image_tag }})</h1>
+                <a href="/admin/trivy" class="btn-secondary" style="text-decoration:none;">← 목록으로</a>
+            </header>
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>CVE ID</th>
+                        <th>심각도</th>
+                        <th>설명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vuln in vulns %}
+                    <tr>
+                        <td style="font-size:0.85rem; font-family:monospace;">{{ vuln.cve_id }}</td>
+                        <td>
+                            {% if vuln.severity == "CRITICAL" %}
+                            <span class="status-badge high">CRITICAL</span>
+                            {% elif vuln.severity == "HIGH" %}
+                            <span class="status-badge" style="background:#f59e0b; color:white;">HIGH</span>
+                            {% elif vuln.severity == "MEDIUM" %}
+                            <span class="status-badge" style="background:#3b82f6; color:white;">MEDIUM</span>
+                            {% else %}
+                            <span class="status-badge low">{{ vuln.severity }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size:0.85rem; color:#94a3b8;">{{ vuln.description or "-" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            CVE 데이터가 없어요.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>

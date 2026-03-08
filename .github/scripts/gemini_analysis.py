@@ -1,9 +1,26 @@
 import os
+import re
 import datetime
 import sys
 import pytz
 import requests
 from google import genai
+
+def parse_cves(scan_text):
+    # CVE 패턴 파싱 (CVE-YYYY-NNNNN 형식)
+    pattern = r'(CVE-\d{4}-\d+)\s+\S+\s+(CRITICAL|HIGH|MEDIUM|LOW)\s+(.*?)(?=\n)'
+    matches = re.findall(pattern, scan_text)
+    cves = []
+    seen = set()
+    for cve_id, severity, description in matches:
+        if cve_id not in seen:
+            seen.add(cve_id)
+            cves.append({
+                "cve_id": cve_id,
+                "severity": severity,
+                "description": description.strip()[:500]
+            })
+    return cves
 
 def main():
     # API 키 확인
@@ -27,6 +44,10 @@ def main():
     high = scan_result.count("HIGH")
     medium = scan_result.count("MEDIUM")
     low = scan_result.count("LOW")
+
+    # CVE 목록 파싱
+    cves = parse_cves(scan_result)
+    print(f"[정보] 파싱된 CVE: {len(cves)}개", file=sys.stderr)
 
     # 이미지 태그 읽기
     image_tag = os.getenv("IMAGE_TAG", "unknown")
@@ -90,7 +111,8 @@ def main():
                 "medium": medium,
                 "low": low,
                 "report_text": scan_result[:5000],
-                "ai_guide": final_report
+                "ai_guide": final_report,
+                "cves": cves
             }
             res = requests.post(
                 "http://localhost:30080/api/trivy-report",

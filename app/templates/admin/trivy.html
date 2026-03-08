@@ -38,6 +38,7 @@
                         <th>Medium</th>
                         <th>Low</th>
                         <th>AI 가이드</th>
+                        <th>CVE 목록</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,17 +57,20 @@
                             <span style="color:#94a3b8; font-size:0.8rem;">없음</span>
                             {% endif %}
                         </td>
+                        <td>
+                            <a href="/admin/trivy/{{ scan.id }}/vulns" class="btn-secondary btn-sm" style="text-decoration:none;">CVE 보기</a>
+                        </td>
                     </tr>
                     {% if scan.ai_guide %}
                     <tr id="guide-{{ scan.id }}" style="display:none;">
-                        <td colspan="7">
+                        <td colspan="8">
                             <div style="background:#0f172a; border-radius:8px; padding:1.5rem; white-space:pre-wrap; font-size:0.85rem; color:#cbd5e1; line-height:1.7;">{{ scan.ai_guide }}</div>
                         </td>
                     </tr>
                     {% endif %}
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#94a3b8; padding:2rem;">
+                        <td colspan="8" style="text-align:center; color:#94a3b8; padding:2rem;">
                             아직 스캔 데이터가 없어요. GitHub Actions 배포 후 자동으로 쌓여요.
                         </td>
                     </tr>
