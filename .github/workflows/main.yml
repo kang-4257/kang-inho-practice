@@ -1,6 +1,5 @@
 name: DevSecOps-Pipeline-Auto-Scan
-
-# 개인 저장소(main)와 조직 저장소(backup) 모두에서 작동하도록 설정
+  
 on:
   push:
     branches: [ "main", "backup" ]
@@ -12,8 +11,7 @@ on:
       - 'k3s/**'
       - 'static/**'    
       - 'templates/**' 
-      - 'app/**'
-   
+      - 'app/**'  
 
 jobs:
   security-and-deploy:
@@ -23,36 +21,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. 도커 허브 로그인 (등록해둔 Secrets 사용)
+      # 2. 도커 허브 로그인
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      # 3. 도커 이미지 빌드 (최신 태그 부여)
+      # 3. 도커 이미지 빌드
       - name: Build Docker Image
         run: |
-          # 짧은 커밋 해시값 추출
-          SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)
-          
-          # 두 종류의 태그로 빌드
+          SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)  
           docker build \
             -t ${{ secrets.DOCKER_USERNAME }}/team02-app:latest \
-            -t ${{ secrets.DOCKER_USERNAME }}/team02-app:$SHORT_SHA .
-          
-          # 다음 단계에서 쓰기 위해 환경 변수에 저장
+            -t ${{ secrets.DOCKER_USERNAME }}/team02-app:$SHORT_SHA .  
           echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_ENV
 
-      # 4. Trivy 보안 스캔 
+      # 4. Trivy 보안 스캔
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
-         scan-type: 'image'
-         image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:latest'
-         format: 'table'
-         output: 'trivy-report.txt'
-         severity: 'CRITICAL,HIGH'
-         scanners: 'vuln,config,secret'
+          scan-type: 'image'
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:latest'
+          format: 'table'
+          output: 'trivy-report.txt'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          scanners: 'vuln,config,secret'
 
-      # 결과 확인용
+      # 5. Trivy 결과 확인
       - name: Check Trivy Report
         run: |
           if [ -s trivy-report.txt ]; then
@@ -62,30 +55,49 @@ jobs:
             echo "--- Trivy 스캔 결과 없음 ---"
           fi
 
-      # 5. Gemini 분석 전에 필요한 라이브러리 설치
+      # 6. Trivy 결과 파싱 후 앱 API로 전송
+      - name: Send Trivy Report to App
+        run: |
+          # 취약점 개수 파싱
+          CRITICAL=$(grep -c "CRITICAL" trivy-report.txt 2>/dev/null || echo 0)
+          HIGH=$(grep -c "HIGH" trivy-report.txt 2>/dev/null || echo 0)
+          MEDIUM=$(grep -c "MEDIUM" trivy-report.txt 2>/dev/null || echo 0)
+          LOW=$(grep -c "LOW" trivy-report.txt 2>/dev/null || echo 0)
+          
+          echo "Critical: $CRITICAL, High: $HIGH, Medium: $MEDIUM, Low: $LOW"
+          
+          # report_text를 base64로 인코딩 (JSON 안전하게)
+          REPORT_B64=$(cat trivy-report.txt | head -200 | base64 -w 0)
+          
+          # FastAPI로 전송
+          curl -s -X POST http://localhost:30080/api/trivy-report \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${{ secrets.INTERNAL_API_KEY }}" \
+            -d "{\"image_tag\":\"${{ env.IMAGE_TAG }}\",\"critical\":$CRITICAL,\"high\":$HIGH,\"medium\":$MEDIUM,\"low\":$LOW,\"report_text\":\"$REPORT_B64\"}" \
+            && echo "✅ Trivy 결과 전송 완료" \
+            || echo "⚠️ Trivy 결과 전송 실패 (배포는 계속 진행)"
+
+      # 7. Python 의존성 설치
       - name: Install Python Dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip install google-generativeai
 
-      # 6. Gemini AI 분석 및 리포트 파일 생성 강제화
+      # 8. Gemini AI 분석
       - name: Gemini AI Analysis
         id: gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          # 분석 스크립트 실행
-          python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
-
-          # [검증 로직] 파일이 존재하고( -f ) 크기가 0보다 큰지( -s ) 체크
+        run: |  
+          python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt  
           if [ -s gemini-analysis.txt ]; then
             echo "✅ Gemini 분석 파일 생성 완료!"
           else
-            echo "⚠️ 분석 결과가 비어있습니다. 기본 메시지를 생성합니다."
+            echo "⚠️ 분석 결과가 비어있습니다."
             echo "분석 리포트 생성 실패 혹은 취약점 없음." > gemini-analysis.txt
           fi
 
-      # 7. GitHub Issue 생성 (검증된 파일 경로 사용)
+      # 9. GitHub Issue 생성
       - name: Create Issue
         uses: peter-evans/create-issue-from-file@v4
         with:
@@ -96,23 +108,30 @@ jobs:
             automated
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. 도커 허브에 이미지 업로드 (배포용)
+      # 10. 도커 허브에 이미지 업로드
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/team02-app:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }}
 
-      # 9. k3s 클러스터에 최종 배포
+      # 11. k3s 클러스터에 배포
       - name: Deploy to K3s
-        run: |
-          # 1. 네임스페이스 생성/확인
-          kubectl create namespace web --dry-run=client -o yaml | kubectl apply -f -
-
-          # 2. 기본 설정(Service, Secret 등) 적용
-          kubectl apply -f deployments/
-
-          # 3. 이미지 버전을 고유 번호(SHA)로 강제 업데이트
-          kubectl set image deployment/fastapi-web fastapi=${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }} -n web
-          
-          # 4. 배포가 안정적으로 완료될 때까지 대기 및 상태 확인
+        run: |  
+          kubectl create namespace web --dry-run=client -o yaml | kubectl apply -f -  
+          kubectl apply -f deployments/  
+          kubectl set image deployment/fastapi-web fastapi=${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }} -n web  
           kubectl rollout status deployment fastapi-web -n web
+
+      # 12. 배포 후 Trivy 재스캔 (Post Run)
+      - name: Post Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }}'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+
+      # 13. 코드 체크아웃 확인
+      - name: Post Checkout code
+        uses: actions/checkout@v3

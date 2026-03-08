@@ -56,7 +56,20 @@ spec:
           valueFrom:
             secretKeyRef:
               name: web-secret
-              key: api-key              
+              key: api-key
+        - name: INTERNAL_API_KEY
+          value: "trivy-api-key"
+        - name: POLARIS_URL
+          value: "http://polaris-dashboard.polaris.svc.cluster.local:80"
+        - name: POLARIS_EXTERNAL_URL
+          value: "http://localhost:30081"
+        - name: GRAFANA_EXTERNAL_URL
+          value: "http://localhost:30000"
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: web-secret
+              key: secret-key
 ---
 apiVersion: v1
 kind: Service
@@ -70,4 +83,4 @@ spec:
   ports:
   - port: 8000
     targetPort: 8000
-    nodePort: 30080
+    nodePort: 30080      
