@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ post.title }} - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Security Board</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/main">📊 대시보드</a></li>
+                <li><a href="#">🕵️ 보안 로그</a></li>
+                <li><a href="#">👥 사용자 관리</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="/logout" class="btn-logout">로그아웃</a>
+            </div>
+        </nav>
+
+        <main class="content">
+            <div class="write-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                    <h2>{{ post.title }}</h2>
+                    {% if post.status == "high" %}
+                        <span class="status-badge high">위험</span>
+                    {% elif post.status == "medium" %}
+                        <span class="status-badge medium">주의</span>
+                    {% else %}
+                        <span class="status-badge low">안전</span>
+                    {% endif %}
+                </div>
+
+                {% if post.summary %}
+                <div style="background:#0f172a; padding:1rem; border-radius:8px; margin-bottom:1.5rem; border-left:3px solid #10b981;">
+                    <p style="color:#94a3b8; font-size:0.8rem; margin:0 0 0.3rem;">🤖 AI 요약</p>
+                    <p style="color:#f8fafc; margin:0;">{{ post.summary }}</p>
+                </div>
+                {% endif %}
+
+                <div style="color:#cbd5e1; line-height:1.8; white-space:pre-wrap;">{{ post.content }}</div>
+
+                <div style="margin-top:2rem;">
+                    <button class="btn-secondary" onclick="location.href='/main'">← 목록으로</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

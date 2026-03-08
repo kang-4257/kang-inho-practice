@@ -1,4 +1,4 @@
-/*로그인*/
+/* 로그인 */
 :root {
   --bg-color: #0f172a;
   --card-bg: #1e293b;
@@ -14,6 +14,7 @@ body, html {
   height: 100%;
   background-color: var(--bg-color);    
   font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-main);
 }
 
 .login-container {
@@ -44,7 +45,7 @@ body, html {
 .input-group { text-align: left; margin-bottom: 1.2rem; }
 .input-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
 
-input {
+input, select, textarea {
   width: 100%;
   padding: 0.8rem;
   border-radius: 8px;
@@ -53,9 +54,10 @@ input {
   color: white;
   box-sizing: border-box;
   outline: none;
+  font-family: inherit;
 }
 
-input:focus { border-color: var(--accent); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 .btn-login {
   width: 100%;
@@ -68,6 +70,7 @@ input:focus { border-color: var(--accent); }
   cursor: pointer;
   margin-top: 1rem;
   transition: background 0.2s;
+  font-size: 1rem;
 }
 
 .btn-login:hover { background: #059669; }
@@ -77,90 +80,163 @@ input:focus { border-color: var(--accent); }
 .login-footer a:hover { color: var(--accent); }
 
 /* 대시보드 레이아웃 */
+.dashboard-page {
+  height: 100vh;
+  overflow: hidden;
+}
+
 .dashboard-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
+  display: flex;
+  height: 100vh;
+  width: 100vw;
 }
 
 .sidebar {
-    width: 260px;
-    background: var(--card-bg);
-    border-right: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
+  width: 240px;
+  min-width: 240px;
+  background: var(--card-bg);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-sizing: border-box;
 }
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.sidebar-header .shield-icon { font-size: 1.5rem; display: inline; }
+.sidebar-header h2 { margin: 0; font-size: 1rem; color: var(--text-main); }
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.nav-links li { margin-bottom: 0.5rem; }
+.nav-links li a {
+  display: block;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+.nav-links li a:hover, .nav-links li.active a {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-main);
+}
+
+.sidebar-footer { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
 
 .content {
-    flex: 1;
-    padding: 2.5rem;
-    overflow-y: auto;
-    background: var(--bg-color);
+  flex: 1;
+  padding: 2.5rem;
+  overflow-y: auto;
+  background: var(--bg-color);
 }
 
-/* 게시판 테이블 디자인 */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.content-header h1 { margin: 0; font-size: 1.4rem; }
+
+/* 게시판 테이블 */
 .post-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .post-table th, .post-table td {
-    padding: 1.2rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 1.2rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .post-table th {
-    background: rgba(255,255,255,0.02);
-    color: var(--text-muted);
-    font-weight: 600;
+  background: rgba(255,255,255,0.02);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .post-table tbody tr { cursor: pointer; transition: 0.2s; }
 .post-table tbody tr:hover { background: rgba(255,255,255,0.05); }
 
-/* 버튼 및 배지 */
+/* 버튼 */
 .btn-write {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.btn-write:hover { background: #059669; }
 
+.btn-secondary {
+  background: #475569;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: #334155; }
+
+/* 배지 */
 .status-badge {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .status-badge.high { background: #ef4444; color: white; }
+.status-badge.medium { background: #f59e0b; color: white; }
 .status-badge.low { background: #3b82f6; color: white; }
 
 .btn-logout {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 .btn-logout:hover { color: #ef4444; }
 
-.write-box { background: #1e293b; padding: 2rem; border-radius: 12px; max-width: 800px; margin: 0 auto; }
-.form-group { margin-bottom: 1.5rem; text-align: left; }
-.form-group label { display: block; margin-bottom: 0.5rem; color: #94a3b8; }
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #334155;
-    background: #0f172a; color: white; box-sizing: border-box;
+/* 글쓰기 */
+.write-box {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 800px;
 }
-.write-buttons { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
-.btn-secondary { background: #475569; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+
+.form-group { margin-bottom: 1.5rem; text-align: left; }
+.form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+
+.write-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
 
 
 

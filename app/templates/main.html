@@ -10,7 +10,7 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <span class="shield-icon">🛡️</span>
-                <h2>Admin</h2>
+                <h2>Security Board</h2>
             </div>
             <ul class="nav-links">
                 <li class="active"><a href="/main">📊 대시보드</a></li>
@@ -34,26 +34,33 @@
                         <tr>
                             <th>번호</th>
                             <th>제목</th>
-                            <th>작성자</th>
-                            <th>날짜</th>
-                            <th>상태</th>
+                            <th>AI 요약</th>
+                            <th>위험 레벨</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr onclick="location.href='/post/1'">
-                            <td>1</td>
-                            <td>SQL 인젝션 공격 시도 감지됨</td>
-                            <td>Admin</td>
-                            <td>2026-03-08</td>
-                            <td><span class="status-badge high">위험</span></td>
+                        {% for post in posts %}
+                        <tr onclick="location.href='/post/{{ post.id }}'">
+                            <td>{{ post.id }}</td>
+                            <td>{{ post.title }}</td>
+                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
+                            <td>
+                                {% if post.status == "high" %}
+                                    <span class="status-badge high">위험</span>
+                                {% elif post.status == "medium" %}
+                                    <span class="status-badge medium">주의</span>
+                                {% else %}
+                                    <span class="status-badge low">안전</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                        <tr onclick="location.href='/post/2'">
-                            <td>2</td>
-                            <td>신규 방화벽 규칙 업데이트 안내</td>
-                            <td>System</td>
-                            <td>2026-03-07</td>
-                            <td><span class="status-badge low">안전</span></td>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
+                                게시글이 없습니다. 첫 번째 리포트를 작성해보세요!
+                            </td>
                         </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </section>
