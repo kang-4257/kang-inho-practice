@@ -34,7 +34,7 @@ jobs:
             -t ${{ secrets.DOCKER_USERNAME }}/team02-app:$SHORT_SHA .
           echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_ENV
 
-      # 4. Trivy 보안 스캔
+      # 4. Trivy 보안 스캔 (table - GitHub Issue용)
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -44,6 +44,17 @@ jobs:
           output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
           scanners: 'vuln,config,secret'
+
+      # 4-1. Trivy 보안 스캔 (json - CVE 파싱용)
+      - name: Run Trivy Scan JSON
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:latest'
+          format: 'json'
+          output: 'trivy-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          scanners: 'vuln'
 
       # 5. Trivy 결과 확인
       - name: Check Trivy Report

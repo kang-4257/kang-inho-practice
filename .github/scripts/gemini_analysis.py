@@ -1,24 +1,33 @@
 import os
 import re
+import json
 import datetime
 import sys
 import pytz
 import requests
 from google import genai
 
-def parse_cves(scan_text):
-    # CVE 패턴 파싱 (CVE-YYYY-NNNNN 형식)
-    pattern = r'(CVE-\d{4}-\d+)\s+\S+\s+(CRITICAL|HIGH|MEDIUM|LOW)\s+(.*?)(?=\n)'
-    matches = re.findall(pattern, scan_text)
+def parse_cves_from_json(json_path):
+    # trivy JSON에서 CVE 파싱
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[에러] JSON 읽기 실패: {e}", file=sys.stderr)
+        return []
+
     cves = []
     seen = set()
-    for cve_id, severity, description in matches:
-        if cve_id not in seen:
+    for result in data.get("Results", []):
+        for vuln in result.get("Vulnerabilities", []) or []:
+            cve_id = vuln.get("VulnerabilityID", "")
+            if not cve_id or cve_id in seen:
+                continue
             seen.add(cve_id)
             cves.append({
                 "cve_id": cve_id,
-                "severity": severity,
-                "description": description.strip()[:500]
+                "severity": vuln.get("Severity", ""),
+                "description": (vuln.get("Description") or vuln.get("Title") or "")[:500]
             })
     return cves
 
@@ -39,15 +48,15 @@ def main():
         print("[에러] trivy-report.txt 없음", file=sys.stderr)
         return
 
-    # 취약점 개수 파싱
-    critical = scan_result.count("CRITICAL")
-    high = scan_result.count("HIGH")
-    medium = scan_result.count("MEDIUM")
-    low = scan_result.count("LOW")
-
-    # CVE 목록 파싱
-    cves = parse_cves(scan_result)
+    # JSON에서 CVE 파싱
+    cves = parse_cves_from_json("trivy-report.json")
     print(f"[정보] 파싱된 CVE: {len(cves)}개", file=sys.stderr)
+
+    # 심각도별 개수 집계
+    critical = sum(1 for c in cves if c["severity"] == "CRITICAL")
+    high = sum(1 for c in cves if c["severity"] == "HIGH")
+    medium = sum(1 for c in cves if c["severity"] == "MEDIUM")
+    low = sum(1 for c in cves if c["severity"] == "LOW")
 
     # 이미지 태그 읽기
     image_tag = os.getenv("IMAGE_TAG", "unknown")
@@ -137,6 +146,6 @@ def main():
             print(f"⚠️ DB 전송 오류: {e}", file=sys.stderr)
     else:
         print("⚠️ INTERNAL_API_KEY 누락, DB 저장 건너뜀", file=sys.stderr)
-  
+
 if __name__ == "__main__":
     main()
