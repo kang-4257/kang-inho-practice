@@ -66,40 +66,61 @@ def main():
     kst_now = datetime.datetime.now(kst)
     current_time = kst_now.strftime("%Y년 %m월 %d일 %H시 %M분")
 
+    # Gemini에 넘길 CVE 요약 (Critical/High만 상세, 나머지는 개수만)
+    critical_cves = [c for c in cves if c["severity"] == "CRITICAL"]
+    high_cves = [c for c in cves if c["severity"] == "HIGH"]
+
+    cve_summary = ""
+    if critical_cves:
+        cve_summary += "[ CRITICAL 취약점 ]\n"
+        for c in critical_cves:
+            cve_summary += f"- {c['cve_id']}: {c['description'][:200]}\n"
+    if high_cves:
+        cve_summary += "\n[ HIGH 취약점 ]\n"
+        for c in high_cves:
+            cve_summary += f"- {c['cve_id']}: {c['description'][:200]}\n"
+    if not cve_summary:
+        cve_summary = "Critical/High 취약점 없음"
+
     # Gemini 분석 프롬프트
     prompt = f"""
-    당신은 시니어 DevSecOps 엔지니어입니다. 
-    다음 Trivy 보안 스캔 결과를 바탕으로 '보안 취약점 개선 권고안'을 작성하세요.
+당신은 시니어 DevSecOps 엔지니어입니다.
+아래 Trivy 보안 스캔 결과를 바탕으로 '보안 취약점 개선 권고안'을 작성하세요.
 
-    ### [리포트 필수 헤더 - 텍스트 한 글자도 바꾸지 말고 그대로 출력할 것]
-    분석 일시: {current_time}
-    제목: Trivy 스캔 결과 기반 보안 강화 권고안
+### 리포트 헤더 (아래 내용을 한 글자도 바꾸지 말고 그대로 출력)
+분석 일시: {current_time}
+제목: Trivy 스캔 결과 기반 보안 강화 권고안
 
-    [스캔 현황 요약]
-    - 🚨 Critical: (스캔 결과에서 개수 추출)
-    - ⚠️ High: (스캔 결과에서 개수 추출)
-    - 💡 전체적인 위험 수준: (낮음/보통/높음 중 선택)
-    --------------------------------------------------
+[스캔 현황 요약]
+- 🚨 Critical: {critical}개
+- ⚠️ High: {high}개
+- 💡 Medium: {medium}개 / Low: {low}개
+- 전체 위험 수준: {"높음" if critical > 0 else "보통" if high > 3 else "낮음"}
+--------------------------------------------------
 
-    [지시 사항]
-    1. 위 '필수 헤더' 및 '스캔 현황 요약' 외에 어떠한 시스템 메시지나 인사말도 적지 마라.
-    2. 과거의 설정 오류는 언급하지 말고 오직 현재 데이터만 분석할 것.
-    3. 마크다운 깨짐 방지를 위해 특수 기호(◆, ◇ 등)는 사용 금지.
-    4. 언어 정책: 전체적인 설명과 가이드는 한국어로 작성하되, 핵심 전문 기술 용어는 영어를 그대로 사용하거나 병기하여 기술적 정확성을 높일 것.
-    5. 모든 권고 사항은 개발자가 즉시 이해하고 적용할 수 있도록 실무적인 톤을 유지할 것.
+### 지시 사항
+1. 헤더 이후 인사말, 시스템 메시지 없이 바로 본문 작성.
+2. 특수 기호(◆, ◇ 등) 사용 금지.
+3. 설명은 한국어로, 기술 용어(CVE ID, 패키지명 등)는 영어 그대로 사용.
+4. 개발자가 즉시 적용 가능한 실무적 톤으로 작성.
+5. 발견된 취약점이 없으면 현재 이미지가 안전하다고 간단히 명시.
 
-    [리포트 구성 가이드]
-    - 총 5가지 핵심 항목(취약점 3개 + Best Practice 2개)을 선정할 것.
-    - 각 항목은 반드시 '원인/영향도 설명'과 'Dockerfile 수정 예시(Before/After)'를 포함할 것.
+### 리포트 구성
+- Critical/High 취약점이 있으면 각각 원인/영향도와 조치 방법(Dockerfile 수정 예시 Before/After 포함)을 작성.
+- Critical/High가 없으면 Medium 이하 주요 취약점 위주로 Best Practice 3가지를 권고.
+- 마지막에 '종합 의견' 한 단락으로 마무리.
 
-    [스캔 결과 데이터]
-    {scan_result}
-    """
+### 스캔 데이터
+이미지 태그: {image_tag}
+Critical: {critical}개 / High: {high}개 / Medium: {medium}개 / Low: {low}개
+
+{cve_summary}
+"""
 
     try:
         print("[정보] Gemini 분석 중...", file=sys.stderr)
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="gemini-1.5-flash",
             contents=prompt
         )
         final_report = response.text.strip()
