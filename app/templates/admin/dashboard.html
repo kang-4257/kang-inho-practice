@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="user-info">
+                <span>👑</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="/admin">📊 대시보드</a></li>
+                <li><a href="/admin/users">👥 유저 관리</a></li>
+                <li><a href="/admin/posts">📝 게시글 관리</a></li>
+                <li><a href="/admin/trivy">🔍 Trivy 스캔</a></li>
+                <li><a href="{{ grafana_url }}" target="_blank">📈 Grafana</a></li>
+                <li><a href="{{ polaris.url }}" target="_blank">🔒 Polaris</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <header class="content-header">
+                <h1>보안 관제 대시보드</h1>
+            </header>
+
+            <!-- 통계 카드 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_users }}</div>
+                        <div class="stat-label">전체 유저</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_posts }}</div>
+                        <div class="stat-label">전체 게시글</div>
+                    </div>
+                </div>
+                <div class="stat-card {% if polaris.score >= 80 %}stat-safe{% elif polaris.score >= 60 %}stat-warn{% else %}stat-danger{% endif %}">
+                    <div class="stat-icon">🔒</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ polaris.score }}%</div>
+                        <div class="stat-label">Polaris 보안 점수</div>
+                    </div>
+                </div>
+                <div class="stat-card {% if latest_scan %}{% if latest_scan.critical > 0 %}stat-danger{% elif latest_scan.high > 0 %}stat-warn{% else %}stat-safe{% endif %}{% else %}stat-safe{% endif %}">
+                    <div class="stat-icon">🔍</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{% if latest_scan %}{{ latest_scan.critical }}{% else %}0{% endif %}</div>
+                        <div class="stat-label">Trivy Critical</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Polaris 상세 -->
+            <div class="admin-section">
+                <h2>🔒 Polaris 보안 현황</h2>
+                <div class="polaris-bar-wrap">
+                    <div class="polaris-bar">
+                        <div class="bar-success" style="width: {{ polaris.success_pct }}%"></div>
+                        <div class="bar-warn" style="width: {{ polaris.warn_pct }}%"></div>
+                        <div class="bar-danger" style="width: {{ polaris.danger_pct }}%"></div>
+                    </div>
+                </div>
+                <div class="polaris-stats">
+                    <span class="badge-success">✅ 통과: {{ polaris.successes }}</span>
+                    <span class="badge-warn">⚠️ 경고: {{ polaris.warnings }}</span>
+                    <span class="badge-danger">🚨 위험: {{ polaris.dangers }}</span>
+                </div>
+                <a href="{{ polaris.url }}" target="_blank" class="btn-secondary" style="display:inline-block; margin-top:1rem; text-decoration:none;">Polaris 상세 보기 →</a>
+            </div>
+
+            <!-- Trivy 최근 스캔 -->
+            <div class="admin-section">
+                <h2>🔍 최근 Trivy 스캔</h2>
+                {% if latest_scan %}
+                <div class="trivy-summary">
+                    <span class="badge-danger">Critical: {{ latest_scan.critical }}</span>
+                    <span class="badge-warn">High: {{ latest_scan.high }}</span>
+                    <span style="color:#94a3b8;">Medium: {{ latest_scan.medium }}</span>
+                    <span style="color:#94a3b8;">Low: {{ latest_scan.low }}</span>
+                    <span style="color:#94a3b8; font-size:0.8rem;">{{ latest_scan.scanned_at }}</span>
+                </div>
+                <a href="/admin/trivy" class="btn-secondary" style="display:inline-block; margin-top:1rem; text-decoration:none;">전체 스캔 기록 →</a>
+                {% else %}
+                <p style="color:#94a3b8;">아직 스캔 데이터가 없어요. GitHub Actions 배포 후 자동으로 쌓여요.</p>
+                {% endif %}
+            </div>
+
+            <!-- Grafana -->
+            <div class="admin-section">
+                <h2>📈 Grafana 모니터링</h2>
+                <a href="{{ grafana_url }}" target="_blank" class="btn-write" style="display:inline-block; text-decoration:none;">Grafana 대시보드 열기 →</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

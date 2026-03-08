@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>유저 관리 - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="user-info">
+                <span>👑</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/admin">📊 대시보드</a></li>
+                <li class="active"><a href="/admin/users">👥 유저 관리</a></li>
+                <li><a href="/admin/posts">📝 게시글 관리</a></li>
+                <li><a href="/admin/trivy">🔍 Trivy 스캔</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+        <main class="content">
+            <header class="content-header">
+                <h1>유저 관리</h1>
+            </header>
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>아이디</th>
+                        <th>권한</th>
+                        <th>게시글 수</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>
+                            {% if u.role == "admin" %}
+                            <span class="status-badge" style="background:#7c3aed;">admin</span>
+                            {% else %}
+                            <span class="status-badge low">user</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u.posts | length }}</td>
+                        <td>
+                            {% if u.role != "admin" %}
+                            <form action="/admin/users/{{ u.id }}/delete" method="post" onsubmit="return confirm('{{ u.username }} 유저를 삭제하시겠습니까?')" style="margin:0;">
+                                <button type="submit" class="btn-danger btn-sm">삭제</button>
+                            </form>
+                            {% else %}
+                            <span style="color:#94a3b8; font-size:0.8rem;">삭제 불가</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>

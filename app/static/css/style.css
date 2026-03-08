@@ -312,3 +312,60 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 .sidebar {
     position: relative;
 }
+
+/* Admin 통계 카드 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.stat-safe { border-left: 4px solid #10b981; }
+.stat-warn { border-left: 4px solid #f59e0b; }
+.stat-danger { border-left: 4px solid #ef4444; }
+
+.stat-icon { font-size: 2rem; }
+.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
+.stat-label { color: var(--text-muted); font-size: 0.85rem; }
+
+/* Admin 섹션 */
+.admin-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.admin-section h2 { margin: 0 0 1rem; font-size: 1rem; }
+
+/* Polaris 바 */
+.polaris-bar-wrap { margin-bottom: 1rem; }
+.polaris-bar {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0f172a;
+}
+.bar-success { background: #10b981; }
+.bar-warn { background: #f59e0b; }
+.bar-danger { background: #ef4444; }
+
+.polaris-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
+.badge-success { color: #10b981; font-weight: 600; }
+.badge-warn { color: #f59e0b; font-weight: 600; }
+.badge-danger { color: #ef4444; font-weight: 600; }
+
+/* Trivy 요약 */
+.trivy-summary { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 관리 - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="user-info">
+                <span>👑</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/admin">📊 대시보드</a></li>
+                <li><a href="/admin/users">👥 유저 관리</a></li>
+                <li class="active"><a href="/admin/posts">📝 게시글 관리</a></li>
+                <li><a href="/admin/trivy">🔍 Trivy 스캔</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+        <main class="content">
+            <header class="content-header">
+                <h1>게시글 관리</h1>
+            </header>
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td>{{ post.id }}</td>
+                        <td onclick="location.href='/post/{{ post.id }}'" style="cursor:pointer;">{{ post.title }}</td>
+                        <td>{{ post.owner.username if post.owner else "알 수 없음" }}</td>
+                        <td>
+                            <form action="/post/{{ post.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')" style="margin:0;">
+                                <button type="submit" class="btn-danger btn-sm">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">게시글이 없어요.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Trivy 스캔 - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="user-info">
+                <span>👑</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/admin">📊 대시보드</a></li>
+                <li><a href="/admin/users">👥 유저 관리</a></li>
+                <li><a href="/admin/posts">📝 게시글 관리</a></li>
+                <li class="active"><a href="/admin/trivy">🔍 Trivy 스캔</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+        <main class="content">
+            <header class="content-header">
+                <h1>Trivy 스캔 기록</h1>
+            </header>
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>스캔 시각</th>
+                        <th>이미지 태그</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                    <tr>
+                        <td style="font-size:0.85rem; color:#94a3b8;">{{ scan.scanned_at }}</td>
+                        <td style="font-size:0.85rem;">{{ scan.image_tag or "-" }}</td>
+                        <td><span class="status-badge high">{{ scan.critical }}</span></td>
+                        <td><span class="status-badge" style="background:#f59e0b; color:white;">{{ scan.high }}</span></td>
+                        <td>{{ scan.medium }}</td>
+                        <td>{{ scan.low }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            아직 스캔 데이터가 없어요. GitHub Actions 배포 후 자동으로 쌓여요.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>
