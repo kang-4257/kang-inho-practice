@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -129,29 +129,26 @@ def register(user_data: UserRequest, db: Session = Depends(get_db)):
 
 # 2. 로그인 (POST /login)
 @app.post("/login")
-def login(user_data: UserRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == user_data.username).first()
+def login(
+    username: str = Form(...),      
+    password: str = Form(...),      
+    db: Session = Depends(get_db)
+):
+    # 1. 유저 조회
+    user = db.query(User).filter(User.username == username).first()
+    
+    # 2. 유저가 없거나 비번이 틀렸을 때 처리
     if not user:
-        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 틀렸습니다.")
+        return RedirectResponse(url="/?error=notfound", status_code=303)
     
-    # 비번 검증 시에도 잘라서 확인
-    safe_pw = user_data.password.encode('utf-8')[:72].decode('utf-8', 'ignore')
+    safe_pw = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
+         
     if not pwd_context.verify(safe_pw, user.hashed_password):
-        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 틀렸습니다.")
+        return RedirectResponse(url="/?error=invalid", status_code=303)
     
-    return {"message": "로그인 성공", "user_id": user.id, "username": user.username}
-
-async def get_ai_summary(content: str):
-    try:
-        # 모델명을 가장 안정적인 1.5-flash로 변경 테스트
-        response = client.models.generate_content(
-            model="gemini-1.5-flash", 
-            contents=f"다음 글을 한 줄로 요약해줘: {content}"
-        )
-        return response.text
-    except Exception as e:
-        print(f"AI Summary Error Log: {str(e)}")
-        return "AI 요약 일시 중단 (API 확인 필요)"
+    # 3. 로그인 성공 시 메인 화면으로 이동
+    response = RedirectResponse(url="/main", status_code=303)
+    return response
 
 # 3. 게시글 작성 (POST /posts) - 최종 수정본
 @app.post("/posts")
