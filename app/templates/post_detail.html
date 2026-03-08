@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ post.title }} - Security Board</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=5">
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-container">
@@ -20,10 +20,8 @@
                 <li><a href="/main">🏠 전체 게시판</a></li>
                 <li><a href="/my-posts">📝 내가 쓴 글</a></li>
                 <li><a href="/write">✏️ 글쓰기</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
             </ul>
-            <div class="sidebar-footer">
-                <a href="/logout" class="btn-logout">🚪 로그아웃</a>
-            </div>
         </nav>
 
         <main class="content">
@@ -36,7 +34,7 @@
                 {% if post.summary %}
                 <div class="ai-summary-box">
                     <p class="ai-label">🤖 AI 요약</p>
-                    <p>{{ post.summary }}</p>
+                    <p style="margin:0; color:#f8fafc;">{{ post.summary }}</p>
                 </div>
                 {% endif %}
 
@@ -47,7 +45,7 @@
                     {% if current_user.id == post.owner_id %}
                     <div style="display:flex; gap:0.5rem;">
                         <button class="btn-secondary" onclick="location.href='/post/{{ post.id }}/edit'">✏️ 수정</button>
-                        <form action="/post/{{ post.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')">
+                        <form action="/post/{{ post.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')" style="margin:0;">
                             <button type="submit" class="btn-danger">🗑️ 삭제</button>
                         </form>
                     </div>

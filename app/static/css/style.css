@@ -288,3 +288,27 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 /* 작은 버튼 */
 .btn-sm { padding: 6px 12px !important; font-size: 0.8rem; }
+
+/* 로그아웃 - 사이드바 맨 아래 고정 */
+.nav-links .logout-item {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    position: absolute;
+    bottom: 1.5rem;
+    width: calc(100% - 3rem);
+}
+
+.nav-links .logout-item a {
+    color: var(--text-muted) !important;
+}
+
+.nav-links .logout-item a:hover {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* sidebar를 relative로 설정해야 logout-item absolute 작동 */
+.sidebar {
+    position: relative;
+}
