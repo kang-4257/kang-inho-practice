@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI()
-  
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SECRET_KEY", "supersecretkey-change-in-production")
@@ -42,7 +42,7 @@ engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Polaris 서비스 주소 (k3s 클러스터 내부)
@@ -87,6 +87,7 @@ class TrivyScan(Base):
     medium = Column(Integer, default=0)
     low = Column(Integer, default=0)
     report_text = Column(String, nullable=True)
+    ai_guide = Column(String, nullable=True)
 
 Base.metadata.create_all(bind=engine)
 
@@ -98,7 +99,7 @@ def get_db():
         db.close()
 
 # --- 헬퍼 ---
-def get_current_user(request: Request):  
+def get_current_user(request: Request):
     if request.session.get("user_id"):
         return {
             "id": request.session.get("user_id"),
@@ -161,7 +162,7 @@ async def fetch_polaris_summary():
 # ========================
 # --- 일반 유저 라우트 ---
 # ========================
-  
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     if get_current_user(request):
@@ -169,12 +170,12 @@ async def read_root(request: Request):
     error = request.query_params.get("error")
     success = request.query_params.get("success")
     return templates.TemplateResponse("login.html", {"request": request, "error": error, "success": success})
-  
+
 @app.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
     error = request.query_params.get("error")
     return templates.TemplateResponse("register.html", {"request": request, "error": error})
-  
+
 @app.post("/register")
 def register(
     username: str = Form(...),
@@ -190,7 +191,7 @@ def register(
     db.add(new_user)
     db.commit()
     return RedirectResponse(url="/?success=registered", status_code=303)
-  
+
 @app.post("/login")
 def login(
     request: Request,
@@ -203,7 +204,7 @@ def login(
         return RedirectResponse(url="/?error=notfound", status_code=303)
     safe_pw = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
     if not pwd_context.verify(safe_pw, user.hashed_password):
-        return RedirectResponse(url="/?error=invalid", status_code=303)  
+        return RedirectResponse(url="/?error=invalid", status_code=303)
     request.session["user_id"] = user.id
     request.session["username"] = user.username
     request.session["role"] = user.role
@@ -211,12 +212,12 @@ def login(
     if user.role == "admin":
         return RedirectResponse(url="/admin", status_code=303)
     return RedirectResponse(url="/main", status_code=303)
-  
+
 @app.get("/logout")
 async def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/", status_code=303)
-  
+
 @app.get("/main", response_class=HTMLResponse)
 async def main_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
@@ -224,14 +225,14 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/", status_code=303)
     posts = db.query(Post).order_by(Post.id.desc()).all()
     return templates.TemplateResponse("main.html", {"request": request, "posts": posts, "current_user": user})
-  
+
 @app.get("/write", response_class=HTMLResponse)
 async def write_page(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse(url="/", status_code=303)
     return templates.TemplateResponse("write.html", {"request": request, "current_user": user})
-  
+
 @app.post("/write")
 async def write_post(
     request: Request,
@@ -247,7 +248,7 @@ async def write_post(
     db.add(new_post)
     db.commit()
     return RedirectResponse(url="/main", status_code=303)
-  
+
 @app.get("/post/{post_id}", response_class=HTMLResponse)
 async def post_detail(post_id: int, request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
@@ -257,7 +258,7 @@ async def post_detail(post_id: int, request: Request, db: Session = Depends(get_
     if not post:
         raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
     return templates.TemplateResponse("post_detail.html", {"request": request, "post": post, "current_user": user})
-  
+
 @app.get("/post/{post_id}/edit", response_class=HTMLResponse)
 async def edit_page(post_id: int, request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
@@ -267,7 +268,7 @@ async def edit_page(post_id: int, request: Request, db: Session = Depends(get_db
     if not post or post.owner_id != user["id"]:
         raise HTTPException(status_code=403, detail="권한이 없습니다.")
     return templates.TemplateResponse("edit.html", {"request": request, "post": post, "current_user": user})
-  
+
 @app.post("/post/{post_id}/edit")
 async def edit_post(
     post_id: int, request: Request,
@@ -284,7 +285,7 @@ async def edit_post(
     post.content = content
     db.commit()
     return RedirectResponse(url=f"/post/{post_id}", status_code=303)
-  
+
 @app.post("/post/{post_id}/delete")
 async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
@@ -299,7 +300,7 @@ async def delete_post(post_id: int, request: Request, db: Session = Depends(get_
     if user["role"] == "admin":
         return RedirectResponse(url="/admin/posts", status_code=303)
     return RedirectResponse(url="/main", status_code=303)
-  
+
 @app.get("/my-posts", response_class=HTMLResponse)
 async def my_posts(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
@@ -389,7 +390,8 @@ async def receive_trivy_report(
         high=body.get("high", 0),
         medium=body.get("medium", 0),
         low=body.get("low", 0),
-        report_text=body.get("report_text")
+        report_text=body.get("report_text"),
+        ai_guide=body.get("ai_guide")
     )
     db.add(scan)
     db.commit()
@@ -401,6 +403,4 @@ async def test_gemini():
         response = client.models.generate_content(model="gemini-2.0-flash-lite", contents="HI")
         return {"gemini_response": response.text}
     except Exception as e:
-        return {"error": str(e)}
-
-        #test
+        return {"error": str(e)}          

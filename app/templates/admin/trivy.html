@@ -37,6 +37,7 @@
                         <th>High</th>
                         <th>Medium</th>
                         <th>Low</th>
+                        <th>AI 가이드</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,16 +49,38 @@
                         <td><span class="status-badge" style="background:#f59e0b; color:white;">{{ scan.high }}</span></td>
                         <td>{{ scan.medium }}</td>
                         <td>{{ scan.low }}</td>
+                        <td>
+                            {% if scan.ai_guide %}
+                            <button class="btn-secondary btn-sm" onclick="toggleGuide('guide-{{ scan.id }}')">보기</button>
+                            {% else %}
+                            <span style="color:#94a3b8; font-size:0.8rem;">없음</span>
+                            {% endif %}
+                        </td>
                     </tr>
+                    {% if scan.ai_guide %}
+                    <tr id="guide-{{ scan.id }}" style="display:none;">
+                        <td colspan="7">
+                            <div style="background:#0f172a; border-radius:8px; padding:1.5rem; white-space:pre-wrap; font-size:0.85rem; color:#cbd5e1; line-height:1.7;">{{ scan.ai_guide }}</div>
+                        </td>
+                    </tr>
+                    {% endif %}
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align:center; color:#94a3b8; padding:2rem;">
+                        <td colspan="7" style="text-align:center; color:#94a3b8; padding:2rem;">
                             아직 스캔 데이터가 없어요. GitHub Actions 배포 후 자동으로 쌓여요.
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <script>
+                // AI 가이드 토글
+                function toggleGuide(id) {
+                    const row = document.getElementById(id);
+                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                }
+            </script>
         </main>
     </div>
 </body>

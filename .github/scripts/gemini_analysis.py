@@ -2,34 +2,42 @@ import os
 import google.generativeai as genai
 import datetime
 import sys
-import pytz 
+import pytz
+import requests
 
 def main():
-    # 1. API 키 로드
+    # API 키 확인
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        print("[에러] GEMINI_API_KEY 누락됨.", file=sys.stderr)
+        print("[에러] GEMINI_API_KEY 누락", file=sys.stderr)
         return
-    
-    genai.configure(api_key=api_key)
 
-    # 2. 제미나이 설정
+    genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # 3. 트리비 리포트 읽기
+    # trivy 리포트 읽기
     try:
         with open("trivy-report.txt", "r", encoding="utf-8") as f:
-            scan_result = f.read() 
+            scan_result = f.read()
     except FileNotFoundError:
-        print("[에러] trivy-report.txt 파일 없음.", file=sys.stderr)
+        print("[에러] trivy-report.txt 없음", file=sys.stderr)
         return
 
-    # 날짜와 시간 생성
+    # 취약점 개수 파싱
+    critical = scan_result.count("CRITICAL")
+    high = scan_result.count("HIGH")
+    medium = scan_result.count("MEDIUM")
+    low = scan_result.count("LOW")
+
+    # 이미지 태그 읽기
+    image_tag = os.getenv("IMAGE_TAG", "unknown")
+
+    # KST 시간 생성
     kst = pytz.timezone('Asia/Seoul')
     kst_now = datetime.datetime.now(kst)
     current_time = kst_now.strftime("%Y년 %m월 %d일 %H시 %M분")
 
-    # 4. 분석 요청
+    # Gemini 분석 프롬프트
     prompt = f"""
     당신은 시니어 DevSecOps 엔지니어입니다. 
     다음 Trivy 보안 스캔 결과를 바탕으로 '보안 취약점 개선 권고안'을 작성하세요.
@@ -58,22 +66,43 @@ def main():
     [스캔 결과 데이터]
     {scan_result}
     """
-    
+
     try:
-        # 분석 실행
-        print("[정보] 리포트 분석 중...", file=sys.stderr)
-        
+        print("[정보] Gemini 분석 중...", file=sys.stderr)
         response = model.generate_content(prompt)
-        
-        # 앞뒤 공백 제거
         final_report = response.text.strip()
-        
-        # 결과 저장
+
+        # 파일 저장 (GitHub Issue용)
         with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
             f.write(final_report)
-            
-        print("✅ 분석 완료 및 파일 저장 성공.", file=sys.stderr)
-        
+
+        print("✅ 분석 완료", file=sys.stderr)
+
+        # DB로 전송
+        internal_api_key = os.getenv("INTERNAL_API_KEY")
+        if internal_api_key:
+            payload = {
+                "image_tag": image_tag,
+                "critical": critical,
+                "high": high,
+                "medium": medium,
+                "low": low,
+                "report_text": scan_result[:5000],
+                "ai_guide": final_report
+            }
+            res = requests.post(
+                "http://localhost:30080/api/trivy-report",
+                json=payload,
+                headers={"X-API-Key": internal_api_key},
+                timeout=10
+            )
+            if res.status_code == 200:
+                print("✅ DB 저장 완료", file=sys.stderr)
+            else:
+                print(f"⚠️ DB 저장 실패: {res.text}", file=sys.stderr)
+        else:
+            print("⚠️ INTERNAL_API_KEY 누락, DB 저장 건너뜀", file=sys.stderr)
+
     except Exception as e:
         print(f"[에러] 분석 실패: {e}", file=sys.stderr)
 
