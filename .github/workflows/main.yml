@@ -66,6 +66,16 @@ jobs:
             echo "--- Trivy 스캔 결과 없음 ---"
           fi
 
+      # 5. Trivy 결과 확인
+      - name: Check Trivy Report
+        run: |
+          if [ -s trivy-report.txt ]; then
+            echo "--- Trivy 스캔 성공 ---"
+            head -n 20 trivy-report.txt
+          else
+            echo "--- Trivy 스캔 결과 없음 ---"
+          fi
+
       # 6. Python 의존성 설치
       - name: Install Python Dependencies
         run: |
@@ -99,13 +109,26 @@ jobs:
             automated
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 9. 도커 허브에 이미지 업로드
+      # 9. 보안 게이트: Critical 취약점 발견 시 배포 중단
+      - name: Security Gate
+        run: |
+          CRITICAL=$(cat trivy-report.json | jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length')
+          echo "Critical 취약점 수: $CRITICAL"
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "❌ Critical 취약점 ${CRITICAL}개 발견 - 배포를 중단합니다."
+            echo "GitHub Issue의 AI 보고서를 확인하고 취약점을 수정한 후 다시 푸시해주세요."
+            exit 1
+          else
+            echo "✅ Critical 취약점 없음 - 배포를 진행합니다."
+          fi
+
+      # 10. 도커 허브에 이미지 업로드
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/team02-app:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }}
 
-      # 10. k3s 클러스터에 배포
+      # 11. k3s 클러스터에 배포
       - name: Deploy to K3s
         run: |
           kubectl create namespace web --dry-run=client -o yaml | kubectl apply -f -
@@ -113,7 +136,7 @@ jobs:
           kubectl set image deployment/fastapi-web fastapi=${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }} -n web
           kubectl rollout status deployment fastapi-web -n web
 
-      # 11. 배포 후 Trivy 재스캔
+      # 12. 배포 후 Trivy 재스캔
       - name: Post Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -123,6 +146,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           scanners: 'vuln'
 
-      # 12. 코드 체크아웃 확인
+      # 13. 코드 체크아웃 확인
       - name: Post Checkout code
         uses: actions/checkout@v3
