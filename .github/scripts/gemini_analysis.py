@@ -101,19 +101,28 @@ def main():
 
         print("✅ 분석 완료", file=sys.stderr)
 
-        # DB로 전송
-        internal_api_key = os.getenv("INTERNAL_API_KEY")
-        if internal_api_key:
-            payload = {
-                "image_tag": image_tag,
-                "critical": critical,
-                "high": high,
-                "medium": medium,
-                "low": low,
-                "report_text": scan_result[:5000],
-                "ai_guide": final_report,
-                "cves": cves
-            }
+    except Exception as e:
+        print(f"[에러] 분석 실패: {e}", file=sys.stderr)
+        final_report = None
+
+        # Gemini 실패해도 빈 파일 생성 (Create Issue 스텝 대비)
+        with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
+            f.write("분석 리포트 생성 실패 혹은 취약점 없음.")
+
+    # Gemini 성공 여부와 관계없이 CVE + 스캔 결과 DB 저장
+    internal_api_key = os.getenv("INTERNAL_API_KEY")
+    if internal_api_key:
+        payload = {
+            "image_tag": image_tag,
+            "critical": critical,
+            "high": high,
+            "medium": medium,
+            "low": low,
+            "report_text": scan_result[:5000],
+            "ai_guide": final_report,
+            "cves": cves
+        }
+        try:
             res = requests.post(
                 "http://localhost:30080/api/trivy-report",
                 json=payload,
@@ -124,11 +133,10 @@ def main():
                 print("✅ DB 저장 완료", file=sys.stderr)
             else:
                 print(f"⚠️ DB 저장 실패: {res.text}", file=sys.stderr)
-        else:
-            print("⚠️ INTERNAL_API_KEY 누락, DB 저장 건너뜀", file=sys.stderr)
-
-    except Exception as e:
-        print(f"[에러] 분석 실패: {e}", file=sys.stderr)
-
+        except Exception as e:
+            print(f"⚠️ DB 전송 오류: {e}", file=sys.stderr)
+    else:
+        print("⚠️ INTERNAL_API_KEY 누락, DB 저장 건너뜀", file=sys.stderr)
+  
 if __name__ == "__main__":
     main()
