@@ -37,7 +37,6 @@
                             <th>번호</th>
                             <th>제목</th>
                             <th>작성일</th>
-                            <th>AI 요약</th>
                             <th>관리</th>
                         </tr>
                     </thead>
@@ -53,7 +52,6 @@
                                 -
                                 {% endif %}
                             </td>
-                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
                             <td>
                                 <div style="display:flex; gap:0.5rem;">
                                     <button class="btn-secondary btn-sm" onclick="location.href='/post/{{ post.id }}/edit'">수정</button>
@@ -65,7 +63,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
                                 아직 작성한 글이 없어요.
                             </td>
                         </tr>

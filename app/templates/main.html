@@ -38,7 +38,6 @@
                             <th>제목</th>
                             <th>작성자</th>
                             <th>작성일</th>
-                            <th>AI 요약</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,11 +53,10 @@
                                 -
                                 {% endif %}
                             </td>
-                            <td style="color:#94a3b8; font-size:0.85rem;">{{ post.summary or "요약 없음" }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" style="text-align:center; color:#94a3b8; padding:2rem;">
+                            <td colspan="4" style="text-align:center; color:#94a3b8; padding:2rem;">
                                 아직 게시글이 없어요. 첫 번째 글을 작성해보세요!
                             </td>
                         </tr>
