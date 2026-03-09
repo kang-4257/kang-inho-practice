@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Depends, Request, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
@@ -28,7 +29,8 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+jinja_env = Environment(loader=FileSystemLoader("templates"), autoescape=True)
+templates = Jinja2Templates(env=jinja_env)
 
 # --- DB ---
 DB_USER = os.getenv("DB_USER", "postgres")
