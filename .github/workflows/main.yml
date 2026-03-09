@@ -72,9 +72,9 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install google-genai requests pytz
 
-      # 7. Groq AI 분석 + DB 저장
-      - name: Groq AI Analysis
-        id: groq
+      # 7. AI 분석 + DB 저장 (Gemini 1순위, Groq fallback)
+      - name: AI Analysis (Gemini + Groq Hybrid)
+        id: ai_analysis
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -83,7 +83,7 @@ jobs:
         run: |
           python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
           if [ -s gemini-analysis.txt ]; then
-            echo "✅ Groq 분석 완료"
+            echo "✅ AI 분석 완료"
           else
             echo "⚠️ 분석 결과 없음"
             echo "분석 리포트 생성 실패 혹은 취약점 없음." > gemini-analysis.txt
@@ -139,4 +139,4 @@ jobs:
 
       # 13. 코드 체크아웃 확인
       - name: Post Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3          

@@ -156,7 +156,7 @@ def main():
         try:
             print("[정보] Gemini AI 분석 중...", file=sys.stderr)
             ai_body = analyze_with_gemini(prompt, gemini_api_key)
-            final_report = fixed_header + "\n\n" + ai_body
+            final_report = fixed_header + "\n📌 분석 엔진: Gemini AI\n\n" + ai_body
             print("✅ Gemini 분석 완료", file=sys.stderr)
         except Exception as e:
             print(f"[경고] Gemini 실패: {e}", file=sys.stderr)
@@ -167,7 +167,7 @@ def main():
         try:
             print("[정보] Groq AI 분석 중...", file=sys.stderr)
             ai_body = analyze_with_groq(prompt, groq_api_key)
-            final_report = fixed_header + "\n\n" + ai_body
+            final_report = fixed_header + "\n📌 분석 엔진: Groq AI (fallback)\n\n" + ai_body
             print("✅ Groq 분석 완료 (fallback)", file=sys.stderr)
         except Exception as e:
             print(f"[에러] Groq 분석 실패: {e}", file=sys.stderr)
