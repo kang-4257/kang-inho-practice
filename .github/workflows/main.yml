@@ -55,7 +55,7 @@ jobs:
           output: 'trivy-report.json'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
           scanners: 'vuln'
-
+  
       # 5. Trivy 결과 확인
       - name: Check Trivy Report
         run: |
@@ -65,17 +65,7 @@ jobs:
           else
             echo "--- Trivy 스캔 결과 없음 ---"
           fi
-
-      # 5. Trivy 결과 확인
-      - name: Check Trivy Report
-        run: |
-          if [ -s trivy-report.txt ]; then
-            echo "--- Trivy 스캔 성공 ---"
-            head -n 20 trivy-report.txt
-          else
-            echo "--- Trivy 스캔 결과 없음 ---"
-          fi
-
+  
       # 6. Python 의존성 설치
       - name: Install Python Dependencies
         run: |
