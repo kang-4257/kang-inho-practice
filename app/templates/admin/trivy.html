@@ -4,6 +4,46 @@
     <meta charset="UTF-8">
     <title>Trivy 스캔 - Admin</title>
     <link rel="stylesheet" href="/static/css/style.css?v=7">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <style>
+        .ai-guide-content h1, .ai-guide-content h2, .ai-guide-content h3 {
+            color: #f1f5f9;
+            margin: 1rem 0 0.5rem 0;
+        }
+        .ai-guide-content h3 { font-size: 1rem; }
+        .ai-guide-content p { color: #cbd5e1; margin: 0.5rem 0; line-height: 1.7; }
+        .ai-guide-content ul, .ai-guide-content ol {
+            color: #cbd5e1;
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        .ai-guide-content li { margin: 0.3rem 0; line-height: 1.6; }
+        .ai-guide-content strong { color: #f8fafc; }
+        .ai-guide-content code {
+            background: #1e293b;
+            color: #7dd3fc;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .ai-guide-content pre {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+        .ai-guide-content pre code {
+            background: none;
+            color: #e2e8f0;
+            padding: 0;
+        }
+        .ai-guide-content hr {
+            border: none;
+            border-top: 1px solid #334155;
+            margin: 1rem 0;
+        }
+    </style>
 </head>
 <body class="dashboard-page">
     <div class="dashboard-container">
@@ -52,7 +92,7 @@
                         <td>{{ scan.low }}</td>
                         <td>
                             {% if scan.ai_guide %}
-                            <button class="btn-secondary btn-sm" onclick="toggleGuide('guide-{{ scan.id }}')">보기</button>
+                            <button class="btn-secondary btn-sm" onclick="toggleGuide('guide-{{ scan.id }}', '{{ scan.id }}')">보기</button>
                             {% else %}
                             <span style="color:#94a3b8; font-size:0.8rem;">없음</span>
                             {% endif %}
@@ -64,9 +104,13 @@
                     {% if scan.ai_guide %}
                     <tr id="guide-{{ scan.id }}" style="display:none;">
                         <td colspan="8">
-                            <div style="background:#0f172a; border-radius:8px; padding:1.5rem; white-space:pre-wrap; font-size:0.85rem; color:#cbd5e1; line-height:1.7;">{{ scan.ai_guide }}</div>
+                            <div class="ai-guide-content" id="guide-content-{{ scan.id }}" style="background:#0f172a; border-radius:8px; padding:1.5rem;"></div>
                         </td>
                     </tr>
+                    <script>
+                        // 마크다운 원본 데이터 저장
+                        window['guideData_{{ scan.id }}'] = {{ scan.ai_guide | tojson }};
+                    </script>
                     {% endif %}
                     {% else %}
                     <tr>
@@ -79,10 +123,17 @@
             </table>
 
             <script>
-                // AI 가이드 토글
-                function toggleGuide(id) {
-                    const row = document.getElementById(id);
-                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                function toggleGuide(rowId, scanId) {
+                    const row = document.getElementById(rowId);
+                    const content = document.getElementById('guide-content-' + scanId);
+                    if (row.style.display === 'none') {
+                        // 마크다운 렌더링
+                        const raw = window['guideData_' + scanId] || '';
+                        content.innerHTML = marked.parse(raw);
+                        row.style.display = 'table-row';
+                    } else {
+                        row.style.display = 'none';
+                    }
                 }
             </script>
         </main>
