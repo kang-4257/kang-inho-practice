@@ -130,7 +130,7 @@ def main():
                 "Content-Type": "application/json"
             },
             json={
-                "model": "llama-3.3-70b-versatile",
+                "model": "deepseek-r1-distill-llama-70b",
                 "messages": [{"role": "user", "content": prompt}],
                 "max_tokens": 2048,
                 "temperature": 0.3
@@ -139,9 +139,6 @@ def main():
         )
         response.raise_for_status()
         ai_body = response.json()["choices"][0]["message"]["content"].strip()
-        # 종합 의견 섹션 헤더 직접 삽입 (모델이 중복 출력하는 문제 방지)
-        if "종합 의견" not in ai_body:
-            ai_body = ai_body + "\n\n### 종합 의견\n(AI 분석 결과 종합 의견 생성 실패)"
         final_report = fixed_header + "\n\n" + ai_body
 
         with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
