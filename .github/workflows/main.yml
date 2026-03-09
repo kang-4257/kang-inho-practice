@@ -93,7 +93,7 @@ jobs:
       - name: Create Issue
         uses: peter-evans/create-issue-from-file@v4
         with:
-          title: "🚨 [보안 알림] Groq AI 취약점 분석 리포트"
+          title: "🚨 [보안 알림] AI 취약점 분석 리포트"
           content-filepath: ./gemini-analysis.txt
           labels: |
             security
@@ -139,4 +139,4 @@ jobs:
 
       # 13. 코드 체크아웃 확인
       - name: Post Checkout code
-        uses: actions/checkout@v3          
+        uses: actions/checkout@v3      

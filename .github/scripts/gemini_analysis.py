@@ -101,17 +101,18 @@ def main():
 
     risk_level = "높음" if critical > 0 else "보통" if high > 3 else "낮음"
     fixed_header = (
-        f"분석 일시: {current_time}\n"
+        f"분석 일시: {current_time}\n\n"
         f"제목: Trivy 스캔 결과 기반 보안 강화 권고안\n\n"
-        f"[스캔 현황 요약]\n"
+        f"[스캔 현황 요약]\n\n"
         f"- 🚨 Critical: {critical}개\n"
         f"- ⚠️ High: {high}개\n"
         f"- 💡 Medium: {medium}개 / Low: {low}개\n"
-        f"- 전체 위험 수준: {risk_level}\n"
+        f"- 전체 위험 수준: {risk_level}\n\n"
         f"--------------------------------------------------"
     )
 
-    prompt = (
+    # Gemini 전용 프롬프트 (상세 형식 지정)
+    gemini_prompt = (
         "당신은 시니어 DevSecOps 엔지니어입니다.\n"
         "아래 Trivy 보안 스캔 결과를 바탕으로 보안 취약점 개선 권고안 본문만 작성하세요.\n\n"
         "### 출력 규칙 (반드시 준수)\n"
@@ -128,13 +129,14 @@ def main():
         "1. CVE-XXXX-XXXX: 취약점 한국어 이름\n"
         "   - **원인 및 영향도**: 취약점 발생 원인과 피해를 3문장 이상 상세히 설명.\n"
         "   - **조치 방법**: 구체적인 해결 방법과 주의사항을 2~3문장으로 설명.\n"
-        "     - 수정 예시 (반드시 포함, 주석 포함):\n"
+        "     - 수정 예시:\n"
         "       ```\n"
-        "       # Before: 취약한 버전 - 어떤 문제가 있는지 주석\n"
-        "       (취약한 코드)\n"
+        "       # Before: 취약한 버전 - 구체적인 문제 설명 주석\n"
+        "       RUN apt-get install -y 패키지명=취약한버전 (또는 pip install 패키지명==취약한버전)\n"
         "       # After: 패치된 버전으로 업데이트하여 취약점 해결\n"
-        "       (수정된 코드)\n"
-        "       ```\n\n"
+        "       RUN apt-get install -y 패키지명=패치버전 (또는 pip install 패키지명==패치버전)\n"
+        "       ```\n"
+        "       실제 패키지명과 버전을 반드시 명시할 것.\n\n"
         "**Medium/Low 취약점 Best Practice 섹션 (반드시 포함, 절대 생략 금지):**\n"
         "[ Medium/Low 취약점 대응 Best Practice ]\n"
         "1. **항목 제목**: 배경 설명 후 구체적인 적용 방법과 명령어 예시까지 3문장 이상 작성.\n"
@@ -149,13 +151,45 @@ def main():
         f"{cve_summary}\n"
     )
 
+    # Groq 전용 프롬프트 (단순하고 직접적인 지시)
+    groq_prompt = (
+        "당신은 시니어 DevSecOps 엔지니어입니다.\n"
+        "아래 Trivy 보안 스캔 결과를 바탕으로 보안 취약점 개선 권고안 본문만 작성하세요.\n\n"
+        "### 규칙\n"
+        "- 인사말, 도입부 문장 없이 바로 취약점 분석 시작.\n"
+        "- 모든 설명은 한국어로 작성. CVE ID, 패키지명, 명령어만 영어 사용.\n"
+        "- 취약점 영문 설명 그대로 출력 금지. 반드시 한국어로 요약.\n"
+        "- 말투: '~해야 합니다', '~될 수 있습니다', '~권고합니다' 형식.\n"
+        "- 각 항목 최소 3문장 이상 작성.\n\n"
+        "### 출력 구조\n\n"
+        "[ HIGH 취약점 ] 또는 [ CRITICAL 취약점 ] 제목 출력\n"
+        "1. CVE-XXXX-XXXX: 취약점 한국어 이름\n"
+        "- 원인 및 영향도: 원인과 피해를 3문장 이상 한국어로 설명\n"
+        "- 조치 방법: 해결 방법을 2~3문장으로 설명\n"
+        "  - 수정 예시 (한국어 주석 포함):\n"
+        "    # Before: 취약한 버전 설명\n"
+        "    (취약한 코드)\n"
+        "    # After: 패치된 버전으로 업데이트\n"
+        "    (수정된 코드)\n\n"
+        "[ Medium/Low 취약점 대응 Best Practice ] (반드시 포함, 생략 금지)\n"
+        "1. **항목 제목**: 배경 설명과 명령어 예시 포함하여 3문장 이상 작성\n"
+        "2. **항목 제목**: 배경 설명과 명령어 예시 포함하여 3문장 이상 작성\n"
+        "3. **항목 제목**: 배경 설명과 명령어 예시 포함하여 3문장 이상 작성\n\n"
+        "종합 의견\n"
+        "전반적인 보안 상태 평가, 추가 고려사항 2~3가지, 향후 권고사항 작성.\n\n"
+        "### 스캔 데이터\n"
+        f"이미지 태그: {image_tag}\n"
+        f"Critical: {critical}개 / High: {high}개 / Medium: {medium}개 / Low: {low}개\n\n"
+        f"{cve_summary}\n"
+    )
+
     final_report = None
 
     # 1순위: Gemini
     if gemini_api_key:
         try:
             print("[정보] Gemini AI 분석 중...", file=sys.stderr)
-            ai_body = analyze_with_gemini(prompt, gemini_api_key)
+            ai_body = analyze_with_gemini(gemini_prompt, gemini_api_key)
             final_report = fixed_header + "\n📌 분석 엔진: Gemini AI\n\n" + ai_body
             print("✅ Gemini 분석 완료", file=sys.stderr)
         except Exception as e:
@@ -166,7 +200,7 @@ def main():
     if final_report is None and groq_api_key:
         try:
             print("[정보] Groq AI 분석 중...", file=sys.stderr)
-            ai_body = analyze_with_groq(prompt, groq_api_key)
+            ai_body = analyze_with_groq(groq_prompt, groq_api_key)
             final_report = fixed_header + "\n📌 분석 엔진: Groq AI (fallback)\n\n" + ai_body
             print("✅ Groq 분석 완료 (fallback)", file=sys.stderr)
         except Exception as e:
