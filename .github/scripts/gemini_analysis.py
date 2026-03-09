@@ -82,30 +82,29 @@ def main():
     if not cve_summary:
         cve_summary = "Critical/High 취약점 없음"
 
-    # Gemini 분석 프롬프트
-    prompt = f"""
-당신은 시니어 DevSecOps 엔지니어입니다.
-아래 Trivy 보안 스캔 결과를 바탕으로 '보안 취약점 개선 권고안'을 작성하세요.
-
-### 출력 규칙 (반드시 준수)
-- 첫 번째 줄은 반드시 "분석 일시: {current_time}" 으로 시작할 것.
-- 두 번째 줄은 반드시 "제목: Trivy 스캔 결과 기반 보안 강화 권고안" 으로 고정할 것.
-- "안녕하세요", "개발팀 여러분", "안녕" 등 어떠한 인사말도 절대 출력 금지.
-- 도입부 설명 문장 금지. 헤더 바로 다음 본문 시작.
-- 특수 기호(◆, ◇ 등) 사용 금지.
-- 설명은 한국어로, 기술 용어(CVE ID, 패키지명 등)는 영어 그대로 사용.
-- 개발자가 즉시 적용 가능한 실무적 톤으로 작성.
-
-### 리포트 헤더 (아래 내용을 한 글자도 바꾸지 말고 그대로 출력)
-분석 일시: {current_time}
+    # 헤더는 코드에서 직접 생성 (모델이 빼먹는 문제 방지)
+    risk_level = "높음" if critical > 0 else "보통" if high > 3 else "낮음"
+    fixed_header = f"""분석 일시: {current_time}
 제목: Trivy 스캔 결과 기반 보안 강화 권고안
 
 [스캔 현황 요약]
 - 🚨 Critical: {critical}개
 - ⚠️ High: {high}개
 - 💡 Medium: {medium}개 / Low: {low}개
-- 전체 위험 수준: {"높음" if critical > 0 else "보통" if high > 3 else "낮음"}
---------------------------------------------------  
+- 전체 위험 수준: {risk_level}
+--------------------------------------------------"""
+
+    # Gemini 분석 프롬프트
+    prompt = f"""
+당신은 시니어 DevSecOps 엔지니어입니다.
+아래 Trivy 보안 스캔 결과를 바탕으로 보안 취약점 개선 권고안 본문만 작성하세요.
+
+### 출력 규칙 (반드시 준수)
+- 인사말("안녕하세요", "개발팀 여러분" 등) 절대 금지.
+- 도입부 설명 문장 없이 바로 취약점 분석 본문 시작.
+- 특수 기호(◆, ◇ 등) 사용 금지.
+- 설명은 한국어로, 기술 용어(CVE ID, 패키지명 등)는 영어 그대로 사용.
+- 개발자가 즉시 적용 가능한 실무적 톤으로 작성.
 
 ### 리포트 구성
 - Critical/High 취약점이 있으면 각각 원인/영향도와 조치 방법(Dockerfile 수정 예시 Before/After 포함)을 작성.
@@ -126,7 +125,8 @@ Critical: {critical}개 / High: {high}개 / Medium: {medium}개 / Low: {low}개
             model="gemini-2.5-flash-lite",
             contents=prompt
         )
-        final_report = response.text.strip()
+        ai_body = response.text.strip()
+        final_report = fixed_header + "\n\n" + ai_body
 
         # 파일 저장 (GitHub Issue용)
         with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
@@ -138,9 +138,9 @@ Critical: {critical}개 / High: {high}개 / Medium: {medium}개 / Low: {low}개
         print(f"[에러] 분석 실패: {e}", file=sys.stderr)
         final_report = None
 
-        # Gemini 실패해도 빈 파일 생성 (Create Issue 스텝 대비)
+        # Gemini 실패해도 헤더+현황요약은 포함해서 저장
         with open("gemini-analysis.txt", "w", encoding="utf-8") as f:
-            f.write("분석 리포트 생성 실패 혹은 취약점 없음.")
+            f.write(fixed_header + "\n\nAI 분석 생성 실패 (API 오류). 위 현황 요약을 참고하세요.")
 
     # Gemini 성공 여부와 관계없이 CVE + 스캔 결과 DB 저장
     internal_api_key = os.getenv("INTERNAL_API_KEY")
