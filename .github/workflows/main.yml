@@ -70,17 +70,18 @@ jobs:
       - name: Install Python Dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install requests pytz
+          pip install google-genai requests pytz
 
       # 7. Groq AI 분석 + DB 저장
       - name: Groq AI Analysis
         id: groq
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
-          python3 .github/scripts/groq_analysis.py > gemini-analysis.txt
+          python3 .github/scripts/gemini_analysis.py > gemini-analysis.txt
           if [ -s gemini-analysis.txt ]; then
             echo "✅ Groq 분석 완료"
           else
