@@ -120,7 +120,7 @@ Critical: {critical}개 / High: {high}개 / Medium: {medium}개 / Low: {low}개
     try:
         print("[정보] Gemini 분석 중...", file=sys.stderr)
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="gemini-2.5-flash-lite",
             contents=prompt
         )
         final_report = response.text.strip()
