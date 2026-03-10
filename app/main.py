@@ -471,5 +471,4 @@ async def test_gemini():
         return {"gemini_response": response.text}
     except Exception as e:
         return {"error": str(e)}      
-
-        #test 
+  
