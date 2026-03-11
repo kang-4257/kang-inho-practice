@@ -70,4 +70,4 @@ graph TD
 | [DevSecOps Pipeline](https://github.com/msp-architect-2026/kang-inho/wiki/DevSecOps-Pipeline) | CI/CD 파이프라인 13단계 |
 | [Security](https://github.com/msp-architect-2026/kang-inho/wiki/Security) | 보안 구성 |
 | [Performance Test](https://github.com/msp-architect-2026/kang-inho/wiki/Performance-Test) | 부하 테스트 결과 및 회고 |
-| [Vulnerability Fix History]((https://github.com/msp-architect-2026/kang-inho/wiki/Vulnerability-Fix-History)) | AI 보고서 기반 취약점 수정 이력 |
+| [Vulnerability Fix History](https://github.com/msp-architect-2026/kang-inho/wiki/Vulnerability-Fix-History) | AI 보고서 기반 취약점 수정 이력 |
