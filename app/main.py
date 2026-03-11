@@ -462,13 +462,5 @@ async def receive_trivy_report(
         db.add(log)
 
     db.commit()
-    return {"message": "저장 완료"}
-
-@app.get("/ai-test")
-async def test_gemini():
-    try:
-        response = client.models.generate_content(model="gemini-2.0-flash-lite", contents="HI")
-        return {"gemini_response": response.text}
-    except Exception as e:
-        return {"error": str(e)}      
+    return {"message": "저장 완료"}   
   
