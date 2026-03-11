@@ -42,10 +42,9 @@ metadata:
   name: postgres-service
   namespace: db
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: postgres
   ports:
   - port: 5432
-    targetPort: 5432
-    nodePort: 30432
+    targetPort: 5432      
