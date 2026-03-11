@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>댓글 수정 - Security Board</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="shield-icon">🛡️</span>
+                <h2>Security Board</h2>
+            </div>
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/main">🏠 전체 게시판</a></li>
+                <li><a href="/my-posts">📝 내가 쓴 글</a></li>
+                <li><a href="/write">✏️ 글쓰기</a></li>
+                <li class="logout-item"><a href="/logout">🚪 로그아웃</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <div class="write-box">
+                <h2>댓글 수정</h2>
+                <form action="/comment/{{ comment.id }}/edit" method="post">
+                    <div class="form-group">
+                        <label>댓글 내용</label>
+                        <textarea name="content" rows="4" style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid #334155; background:#334155; color:white; box-sizing:border-box; font-family:inherit; resize:vertical;" required>{{ comment.content }}</textarea>
+                    </div>
+                    <div class="write-buttons">
+                        <button type="button" class="btn-secondary" onclick="location.href='/post/{{ comment.post_id }}'">← 취소</button>
+                        <button type="submit" class="btn-write">수정 완료</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

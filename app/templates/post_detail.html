@@ -47,6 +47,41 @@
                     {% endif %}
                 </div>
             </div>
+            <div class="write-box" style="margin-top:1.5rem;">
+                <h3 style="margin-bottom:1.5rem;">댓글 {{ post.comments|length }}개</h3>
+
+                {% for comment in post.comments %}
+                <div style="background:#0f172a; border-radius:8px; padding:1rem; margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span style="color:#94a3b8; font-size:0.85rem;">{{ comment.owner.username if comment.owner else "알 수 없음" }}</span>
+                        {% if current_user.id == comment.owner_id or current_user.role == "admin" %}
+                        <div style="display:flex; gap:0.5rem;">
+                            {% if current_user.id == comment.owner_id %}
+                            <button class="btn-secondary btn-sm" onclick="location.href='/comment/{{ comment.id }}/edit'">✏️ 수정</button>
+                            {% endif %}
+                            <form action="/comment/{{ comment.id }}/delete" method="post" onsubmit="return confirm('삭제하시겠습니까?')" style="margin:0;">
+                                <button type="submit" class="btn-danger btn-sm">🗑️ 삭제</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <p style="color:#cbd5e1; margin:0;">{{ comment.content }}</p>
+                </div>
+                {% else %}
+                <p style="color:#94a3b8; font-size:0.9rem;">아직 댓글이 없어요.</p>
+                {% endfor %}
+
+                <div style="margin-top:1.5rem;">
+                    <form action="/post/{{ post.id }}/comment" method="post">
+                        <div class="form-group">
+                            <textarea name="content" rows="3" placeholder="댓글을 입력하세요..." style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid #334155; background:#334155; color:white; box-sizing:border-box; font-family:inherit; resize:vertical;" required></textarea>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end;">
+                            <button type="submit" class="btn-write">댓글 작성</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
 </body>

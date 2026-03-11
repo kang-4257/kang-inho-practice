@@ -407,6 +407,76 @@ async def admin_trivy(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse("admin/trivy.html", {"request": request, "current_user": user, "scans": scans})
 
+@app.post("/post/{post_id}/comment")
+async def create_comment(
+    post_id: int,
+    request: Request,
+    content: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/", status_code=303)
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    comment = Comment(content=content, post_id=post_id, owner_id=user["id"])
+    db.add(comment)
+    db.commit()
+    return RedirectResponse(url=f"/post/{post_id}", status_code=303)
+
+@app.get("/comment/{comment_id}/edit", response_class=HTMLResponse)
+async def edit_comment_page(
+    comment_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/", status_code=303)
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment or comment.owner_id != user["id"]:
+        raise HTTPException(status_code=403, detail="권한이 없습니다.")
+    return templates.TemplateResponse("edit_comment.html", {
+        "request": request,
+        "comment": comment,
+        "current_user": user
+    })
+
+@app.post("/comment/{comment_id}/edit")
+async def edit_comment(
+    comment_id: int,
+    request: Request,
+    content: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/", status_code=303)
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment or comment.owner_id != user["id"]:
+        raise HTTPException(status_code=403, detail="권한이 없습니다.")
+    comment.content = content
+    db.commit()
+    return RedirectResponse(url=f"/post/{comment.post_id}", status_code=303)
+
+@app.post("/comment/{comment_id}/delete")
+async def delete_comment(
+    comment_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/", status_code=303)
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment or (comment.owner_id != user["id"] and user["role"] != "admin"):
+        raise HTTPException(status_code=403, detail="권한이 없습니다.")
+    post_id = comment.post_id
+    db.delete(comment)
+    db.commit()
+    return RedirectResponse(url=f"/post/{post_id}", status_code=303)
+
 @app.get("/admin/trivy/{scan_id}/vulns", response_class=HTMLResponse)
 async def admin_vulns(scan_id: int, request: Request, db: Session = Depends(get_db)):
     user = require_admin(request)
