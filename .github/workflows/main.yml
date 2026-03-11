@@ -7,15 +7,15 @@ on:
       - 'Dockerfile'
       - 'requirements.txt'
       - '.github/**'
-      - 'deployments/**'  
-      - 'k3s/**'
+      - 'deployments/**'
+      - 'k3s/**'        
       - 'app/**'
       - 'grafana-svc.yaml'
       - 'polaris-svc.yaml'
 
 jobs:
   security-and-deploy:
-    runs-on: self-hosted 
+    runs-on: self-hosted
     steps:
       # 1. 소스 코드 가져오기
       - name: Checkout code
@@ -33,19 +33,8 @@ jobs:
             -t ${{ secrets.DOCKER_USERNAME }}/team02-app:latest \
             -t ${{ secrets.DOCKER_USERNAME }}/team02-app:$SHORT_SHA .
           echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_ENV
-
-      # 4. Trivy 보안 스캔 (table - GitHub Issue용)
-      - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'image'
-          image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:latest'
-          format: 'table'
-          output: 'trivy-report.txt'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-          scanners: 'vuln,config,secret'
-
-      # 4-1. Trivy 보안 스캔 (json - CVE 파싱용)
+  
+      # 4. Trivy 보안 스캔
       - name: Run Trivy Scan JSON
         uses: aquasecurity/trivy-action@master
         with:
@@ -54,7 +43,7 @@ jobs:
           format: 'json'
           output: 'trivy-report.json'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-          scanners: 'vuln'
+          scanners: 'vuln,config,secret'
 
       # 5. Trivy 결과 확인
       - name: Check Trivy Report

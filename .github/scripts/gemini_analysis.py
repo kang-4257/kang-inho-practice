@@ -62,14 +62,7 @@ def main():
     if not gemini_api_key and not groq_api_key:
         print("[에러] GEMINI_API_KEY, GROQ_API_KEY 둘 다 누락", file=sys.stderr)
         return
-
-    try:
-        with open("trivy-report.txt", "r", encoding="utf-8") as f:
-            scan_result = f.read()
-    except FileNotFoundError:
-        print("[에러] trivy-report.txt 없음", file=sys.stderr)
-        return
-
+  
     cves = parse_cves_from_json("trivy-report.json")
     print(f"[정보] 파싱된 CVE: {len(cves)}개", file=sys.stderr)
 
@@ -223,8 +216,7 @@ def main():
             "critical": critical,
             "high": high,
             "medium": medium,
-            "low": low,
-            "report_text": scan_result[:5000],
+            "low": low,              
             "ai_guide": final_report,
             "cves": cves
         }
