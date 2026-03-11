@@ -27,14 +27,14 @@ venv/
 *.pem
 *.key
 
-# --- GitHub Actions Runner (추가됨) ---
+# --- GitHub Actions Runner  ---
 actions-runner/
 _diag/
 *.log
 *.json
 reports/
  
-# --- Exceptions (무시하지 않을 소중한 파일들) ---
+# --- Exceptions ---
 !deployments/*.yaml
 !k3s/**/*.yaml
 !.github/scripts/*.py

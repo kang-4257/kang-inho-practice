@@ -9,9 +9,9 @@ on:
       - '.github/**'
       - 'deployments/**'  
       - 'k3s/**'
-      - 'static/**'    
-      - 'templates/**' 
       - 'app/**'
+      - 'grafana-svc.yaml'
+      - 'polaris-svc.yaml'
 
 jobs:
   security-and-deploy:
