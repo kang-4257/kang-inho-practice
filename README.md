@@ -1,4 +1,4 @@
-# FastAPI 게시판 기반 DevSecOps 실습 프로젝트
+# GitHub Actions 기반 DevSecOps 자동화 파이프라인 구축
 
 FastAPI 게시판 애플리케이션을 k3s 쿠버네티스 클러스터에 배포하고, GitHub Actions 기반 13단계 파이프라인으로 빌드, 보안 스캔, AI 분석, 자동 배포를 통합한 DevSecOps 시스템입니다.
 
