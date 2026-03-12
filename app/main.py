@@ -17,10 +17,17 @@ from sqlalchemy.sql import func
 from passlib.context import CryptContext
 from google import genai
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     SessionMiddleware,
@@ -207,6 +214,7 @@ def register(
     return RedirectResponse(url="/?success=registered", status_code=303)
 
 @app.post("/login")
+@limiter.limit("5/minute")
 def login(
     request: Request,
     username: str = Form(...),
