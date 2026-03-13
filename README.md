@@ -1,6 +1,6 @@
 # GitHub Actions 기반 DevSecOps 자동화 파이프라인 구축
 
-FastAPI 게시판 애플리케이션을 k3s 쿠버네티스 클러스터에 배포하고, GitHub Actions 기반 13단계 파이프라인으로 빌드, 보안 스캔, AI 분석, 자동 배포를 통합한 DevSecOps 시스템입니다.
+FastAPI 게시판 애플리케이션을 k3s 쿠버네티스 클러스터에 배포하고, GitHub Actions 기반 12단계 파이프라인으로 빌드, 보안 스캔, AI 분석, 자동 배포를 통합한 DevSecOps 시스템입니다.
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
