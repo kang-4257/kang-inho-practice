@@ -541,4 +541,6 @@ async def receive_trivy_report(
 
     db.commit()
     return {"message": "저장 완료"}   
+
+    # ....
   
