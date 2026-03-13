@@ -124,8 +124,4 @@ jobs:
           image-ref: '${{ secrets.DOCKER_USERNAME }}/team02-app:${{ env.IMAGE_TAG }}'
           format: 'table'
           severity: 'CRITICAL,HIGH'
-          scanners: 'vuln'
-
-      # 13. 코드 체크아웃 확인
-      - name: Post Checkout code
-        uses: actions/checkout@v3      
+          scanners: 'vuln'    
