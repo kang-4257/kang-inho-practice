@@ -1,5 +1,5 @@
 # 1. 베이스 이미지 설정
-FROM python:3.11-slim
+FROM python:3.9-slim
 
 # 2. 필수 환경 변수 설정
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # 4. glibc 업데이트 (CVE-2026-0861 대응)
-RUN apt-get update && apt-get install -y --only-upgrade libc6 && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y --only-upgrade libc6 && rm -rf /var/lib/apt/lists/*
 
 # 5. 비루트 사용자 생성 및 권한 설정
 RUN useradd -m appuser
