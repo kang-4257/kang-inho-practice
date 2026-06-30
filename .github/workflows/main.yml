@@ -44,6 +44,11 @@ jobs:
           output: 'trivy-report.json'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
           scanners: 'vuln,config,secret'
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
 
       # 5. Trivy 결과 확인
       - name: Check Trivy Report
