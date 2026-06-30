@@ -2,7 +2,7 @@ name: DevSecOps-Pipeline-Auto-Scan
 
 on:
   push:
-    branches: [ "main", "backup" ]
+    branches: [ "main", "backup", "test-vuln-gate-practice" ]
     paths:
       - 'Dockerfile'
       - 'requirements.txt'
